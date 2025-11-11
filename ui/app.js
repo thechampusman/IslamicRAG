@@ -18,6 +18,7 @@ const sidebarOverlay = document.getElementById('sidebarOverlay');
 // State
 let currentChatId = null;
 let chats = [];
+let currentRequestController = null; // For cancelling ongoing requests
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -25,6 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
   autoResizeTextarea();
   loadThemePreference();
   loadChatHistory();
+  
+  // Cancel request when user leaves page
+  window.addEventListener('beforeunload', cancelCurrentRequest);
 });
 
 function setupEventListeners() {
@@ -123,6 +127,9 @@ async function handleSubmit(e) {
   const question = questionInput.value.trim();
   if (!question) return;
   
+  // Cancel any ongoing request
+  cancelCurrentRequest();
+  
   // Start new chat if needed
   if (!currentChatId) {
     startNewChat();
@@ -139,11 +146,15 @@ async function handleSubmit(e) {
   // Show loading
   const loadingId = addLoadingMessage();
   
+  // Create new AbortController for this request
+  currentRequestController = new AbortController();
+  
   try {
     const res = await fetch(`${API_BASE}/ask`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question, chat_id: currentChatId })
+      body: JSON.stringify({ question, chat_id: currentChatId }),
+      signal: currentRequestController.signal
     });
     
     if (!res.ok) throw new Error(`Server error: ${res.status}`);
@@ -165,7 +176,15 @@ async function handleSubmit(e) {
     
   } catch (err) {
     removeLoadingMessage(loadingId);
-    addMessage('assistant', `Error: ${err.message}`);
+    
+    // Don't show error if request was cancelled
+    if (err.name === 'AbortError') {
+      console.log('Request cancelled by user');
+    } else {
+      addMessage('assistant', `Error: ${err.message}`);
+    }
+  } finally {
+    currentRequestController = null;
   }
 }
 
@@ -432,4 +451,11 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+function cancelCurrentRequest() {
+  if (currentRequestController) {
+    currentRequestController.abort();
+    currentRequestController = null;
+  }
 }

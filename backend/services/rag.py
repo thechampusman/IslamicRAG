@@ -41,9 +41,11 @@ async def generate_fallback_answer(question: str, max_tokens: int, temperature: 
     from backend.core.config import settings
     
     prompt = (
-        "You are an Islamic knowledge assistant. Answer this question about Islam.\n\n"
+        "You are an Islamic scholar. Answer this question about Islam comprehensively. "
+        "If the topic involves prohibited acts (haram), explain the Islamic ruling with evidence. "
+        "Educating about Islamic law on all topics is your role.\n\n"
         f"Question: {question}\n\n"
-        "Provide a clear, accurate answer about Islamic teachings:"
+        "Provide a clear Islamic answer with Quranic/Hadith references:"
     )
     
     async with httpx.AsyncClient(timeout=120) as client:

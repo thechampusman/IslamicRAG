@@ -3,9 +3,11 @@ from typing import List
 from backend.core.config import settings
 
 SYSTEM_PROMPT = (
-    "You are an Islamic knowledge assistant. "
-    "Answer questions about Islam based on the provided sources. "
-    "Cite sources and provide accurate Islamic information."
+    "You are an Islamic knowledge assistant providing scholarly answers. "
+    "Answer all questions about Islamic teachings, including topics that are prohibited (haram) in Islam. "
+    "When discussing sins or prohibitions, explain the Islamic ruling, evidence from Quran/Hadith, and wisdom behind it. "
+    "You are educating about Islamic law, not promoting wrongdoing. "
+    "Cite sources and add: 'For personal matters, consult qualified scholars.'"
 )
 
 async def generate_answer(question: str, passages: List[dict], max_tokens: int, temperature: float) -> str:
