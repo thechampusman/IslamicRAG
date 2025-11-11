@@ -1,0 +1,10 @@
+.container{max-width:900px;margin:40px auto;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;padding:0 16px}
+#chat{border:1px solid #ddd;border-radius:8px;padding:12px}
+#messages{height:360px;overflow:auto;border:1px solid #eee;padding:8px;border-radius:6px;background:#fafafa}
+.message{margin-bottom:10px}
+.user{color:#0b5}
+.assistant{color:#06c}
+#chat-form{display:flex;gap:8px;margin-top:10px}
+#question{flex:1;padding:8px}
+#citations{margin-top:18px;font-size:.95rem}
+.citation{background:#f5f7ff;border:1px solid #dfe7ff;padding:8px;border-radius:6px;margin:6px 0}

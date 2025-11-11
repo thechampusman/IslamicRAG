@@ -1,0 +1,40 @@
+Custom Contribute-Only Source License (CCOSL)
+Version 1.0 – 2025-11-10
+
+Copyright (c) 2025 Islamic RAG Project Authors
+
+Permission is hereby granted to any individual or organization ("User") to:
+  1. View, clone, and run the Software for personal, educational, internal evaluation, or research purposes.
+  2. Modify the Software privately.
+  3. Submit modifications, bug fixes, or enhancements ("Contributions") to the original upstream repository via pull request.
+
+Restrictions:
+  A. Redistribution Prohibited: User may NOT publish, distribute, sublicense, sell, host publicly, copy to another public repository, or otherwise make the Software or any derivative work available outside the original upstream repository without prior written permission from the Copyright Holder.
+  B. Public Forks Limited: Public forks are permitted ONLY for the purpose of preparing a pull request to the upstream repository. After the pull request is merged or rejected, the fork must be deleted within 30 days.
+  C. No Rebranding or Removal of Notices: All copyright, attribution, and notices must remain intact. User may not claim ownership or authorship of substantial portions.
+  D. No Misrepresentation: User must not present the Software as their original work or imply endorsement by project authors.
+  E. Commercial Use Requires License: Any commercial hosting, integration into a paid service, resale, or SaaS offering requires a separate written commercial license.
+  F. AI Model Training: The Software (code + included data) may NOT be used as training data for commercial AI models without written consent.
+  G. Data Authenticity: Users must not inject misleading or falsified religious material and submit it as authoritative content.
+
+Contributions:
+  1. By submitting a Contribution, the contributor warrants they have the right to do so and that it does not infringe third-party IP.
+  2. Contributor grants the Copyright Holder a perpetual, irrevocable, worldwide, royalty-free license to use, modify, reproduce, distribute, and relicense the Contribution as part of the Software.
+  3. Contributions are merged under this License; contributors retain original copyright in their changes subject to these terms.
+
+Termination:
+  - Any breach of this License immediately and automatically terminates the granted rights. Upon termination, User must cease use and destroy all copies except for prior merged Contributions already incorporated upstream.
+
+NO WARRANTY:
+THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, OR NON-INFRINGEMENT.
+
+LIMITATION OF LIABILITY:
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT OF OR IN CONNECTION WITH THE SOFTWARE OR ITS USE.
+
+Governing Law:
+Specify jurisdiction (e.g., YOUR COUNTRY / STATE). If omitted, the Copyright Holder may designate one in case of dispute.
+
+Contact:
+For commercial licensing, redistribution permission, or clarifications: maintainer@example.com (replace with real email).
+
+If you do not agree to all terms, you must not use, copy, modify, or submit Contributions.
