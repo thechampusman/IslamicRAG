@@ -6,6 +6,7 @@ class AskRequest(BaseModel):
     max_tokens: Optional[int] = 512
     temperature: Optional[float] = 0.2
     top_k: Optional[int] = 4
+    chat_id: Optional[str] = None  # For chat history
 
 class Passage(BaseModel):
     id: str
@@ -16,7 +17,7 @@ class Passage(BaseModel):
 
 class Citation(BaseModel):
     source: str
-    reference: Optional[str]
+    reference: Optional[str] = None
     snippet: str
 
 class AskResponse(BaseModel):
@@ -30,3 +31,23 @@ class IngestRequest(BaseModel):
     batch_size: int = 32
     chunk_size: int = 800
     chunk_overlap: int = 200
+
+# Chat History Models
+
+class ChatCreate(BaseModel):
+    id: str = Field(..., description="Unique chat ID")
+    title: str = Field(default="New Chat", description="Chat title")
+
+class ChatResponse(BaseModel):
+    id: str
+    title: str
+    created_at: str
+    updated_at: str
+
+class MessageResponse(BaseModel):
+    id: int
+    role: str
+    content: str
+    citations: Optional[List[Citation]] = None
+    is_fallback: bool
+    created_at: str

@@ -1,0 +1,49 @@
+# Chat History Database
+
+`data/chathistory.db` - SQLite database storing conversation history
+
+⚠️ **IMPORTANT**: This file is in `.gitignore` for privacy reasons. It contains your personal chat history and should not be committed to version control.
+
+## Database Location
+
+The database is automatically created at: `data/chathistory.db`
+
+- Each user/developer has their own local copy
+- Not shared via Git (private conversations)
+- Created automatically on first use
+- Safe to delete if you want to reset chat history
+
+## Tables
+
+### chats
+- `id` (TEXT PRIMARY KEY): Unique chat session ID
+- `title` (TEXT): Chat title (auto-generated from first message)
+- `created_at` (TIMESTAMP): When chat was created
+- `updated_at` (TIMESTAMP): Last message time
+
+### messages
+- `id` (INTEGER PRIMARY KEY): Auto-increment message ID
+- `chat_id` (TEXT): Foreign key to chats table
+- `role` (TEXT): "user" or "assistant"
+- `content` (TEXT): Message content
+- `citations` (TEXT): JSON array of citation objects (optional)
+- `is_fallback` (BOOLEAN): Whether answer used fallback mode
+- `created_at` (TIMESTAMP): When message was sent
+
+## Usage
+
+Chat history is automatically saved when you include `chat_id` in the `/ask` request.
+The database file is created automatically on first use by the `ChatDB` class.
+
+## Backup
+
+To backup your chat history:
+```bash
+cp data/chathistory.db data/chathistory.backup.db
+```
+
+To reset (delete all chats):
+```bash
+rm data/chathistory.db
+# Database will be recreated empty on next use
+```

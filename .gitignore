@@ -10,3 +10,5 @@ __pycache__/
 # Data
 /data/vectordb/
 /data/processed/
+/data/chathistory.db
+*.db

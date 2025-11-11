@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
   autoResizeTextarea();
   loadThemePreference();
+  loadChatHistory();
 });
 
 function setupEventListeners() {
@@ -91,6 +92,15 @@ function closeMobileMenu() {
 
 function startNewChat() {
   currentChatId = Date.now().toString();
+  
+  // Create chat on server
+  fetch(`${API_BASE}/chats`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: currentChatId, title: 'New Chat' })
+  }).catch(err => console.error('Error creating chat:', err));
+  
+  // Add to local array
   chats.push({ id: currentChatId, messages: [], title: 'New Chat' });
   
   // Hide welcome, show messages
@@ -133,7 +143,7 @@ async function handleSubmit(e) {
     const res = await fetch(`${API_BASE}/ask`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question })
+      body: JSON.stringify({ question, chat_id: currentChatId })
     });
     
     if (!res.ok) throw new Error(`Server error: ${res.status}`);
@@ -156,6 +166,28 @@ async function handleSubmit(e) {
   } catch (err) {
     removeLoadingMessage(loadingId);
     addMessage('assistant', `Error: ${err.message}`);
+  }
+}
+
+async function loadChatHistory() {
+  try {
+    const res = await fetch(`${API_BASE}/chats`);
+    if (!res.ok) return;
+    
+    const serverChats = await res.json();
+    
+    // Convert server chats to local format
+    chats = serverChats.map(chat => ({
+      id: chat.id,
+      title: chat.title,
+      messages: [], // Messages loaded on demand
+      created_at: chat.created_at,
+      updated_at: chat.updated_at
+    }));
+    
+    updateChatHistory();
+  } catch (err) {
+    console.error('Error loading chat history:', err);
   }
 }
 
@@ -269,39 +301,87 @@ function updateChatHistory() {
   chats.slice().reverse().forEach(chat => {
     const chatItem = document.createElement('div');
     chatItem.className = 'chat-history-item';
-    chatItem.style.cssText = 'padding:0.75rem;cursor:pointer;border-radius:0.375rem;font-size:0.875rem;color:var(--text-secondary);transition:all 0.2s;';
-    chatItem.textContent = chat.title;
+    chatItem.style.cssText = 'padding:0.75rem;cursor:pointer;border-radius:0.375rem;font-size:0.875rem;color:var(--text-secondary);transition:all 0.2s;display:flex;justify-content:space-between;align-items:center;';
+    
+    const titleSpan = document.createElement('span');
+    titleSpan.textContent = chat.title;
+    titleSpan.style.flex = '1';
+    titleSpan.style.overflow = 'hidden';
+    titleSpan.style.textOverflow = 'ellipsis';
+    titleSpan.style.whiteSpace = 'nowrap';
+    
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = '🗑️';
+    deleteBtn.style.cssText = 'background:none;border:none;cursor:pointer;font-size:1rem;opacity:0.6;padding:0.25rem;';
+    deleteBtn.onclick = (e) => {
+      e.stopPropagation();
+      deleteChat(chat.id);
+    };
+    
+    chatItem.appendChild(titleSpan);
+    chatItem.appendChild(deleteBtn);
     
     chatItem.addEventListener('mouseenter', () => {
       chatItem.style.background = 'var(--bg-tertiary)';
-      chatItem.style.color = 'var(--text-primary)';
+      titleSpan.style.color = 'var(--text-primary)';
     });
     
     chatItem.addEventListener('mouseleave', () => {
       chatItem.style.background = 'transparent';
-      chatItem.style.color = 'var(--text-secondary)';
+      titleSpan.style.color = 'var(--text-secondary)';
     });
     
-    chatItem.addEventListener('click', () => loadChat(chat.id));
+    titleSpan.addEventListener('click', () => loadChat(chat.id));
     
     chatHistory.appendChild(chatItem);
   });
 }
 
-function loadChat(chatId) {
-  const chat = chats.find(c => c.id === chatId);
-  if (!chat) return;
-  
-  currentChatId = chatId;
-  welcomeScreen.style.display = 'none';
-  messagesContainer.classList.add('active');
-  messagesContainer.innerHTML = '';
-  
-  chat.messages.forEach(msg => {
-    addMessage(msg.role, msg.text, msg.citations, msg.isFallback);
-  });
-  
-  closeMobileMenu();
+async function deleteChat(chatId) {
+  try {
+    const res = await fetch(`${API_BASE}/chats/${chatId}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Failed to delete chat');
+    
+    // Remove from local array
+    chats = chats.filter(c => c.id !== chatId);
+    updateChatHistory();
+    
+    // If current chat was deleted, show welcome screen
+    if (currentChatId === chatId) {
+      currentChatId = null;
+      welcomeScreen.style.display = 'flex';
+      messagesContainer.classList.remove('active');
+      messagesContainer.innerHTML = '';
+    }
+  } catch (err) {
+    console.error('Error deleting chat:', err);
+    alert('Failed to delete chat');
+  }
+}
+
+async function loadChat(chatId) {
+  try {
+    // Fetch messages from server
+    const res = await fetch(`${API_BASE}/chats/${chatId}/messages`);
+    if (!res.ok) throw new Error('Failed to load chat');
+    
+    const messages = await res.json();
+    
+    currentChatId = chatId;
+    welcomeScreen.style.display = 'none';
+    messagesContainer.classList.add('active');
+    messagesContainer.innerHTML = '';
+    
+    // Display messages
+    messages.forEach(msg => {
+      addMessage(msg.role, msg.content, msg.citations, msg.is_fallback);
+    });
+    
+    closeMobileMenu();
+  } catch (err) {
+    console.error('Error loading chat:', err);
+    alert('Failed to load chat');
+  }
 }
 
 function formatMessageText(text) {

@@ -169,6 +169,27 @@ Invoke-RestMethod -Uri "http://localhost:8000/ask" -Method POST -Body '{"questio
 - Avoids issuing rulings; emphasizes authenticity & verification.
 
 ---
+## 💾 Data Storage
+
+### Chat History Database
+- **Location**: `data/chathistory.db` (SQLite)
+- **Purpose**: Stores your conversation history locally
+- **Privacy**: Excluded from Git (`.gitignore`) - your chats stay private
+- **Tables**: 
+  - `chats` - Session metadata (id, title, timestamps)
+  - `messages` - User/assistant messages with citations
+- **Backup**: Copy the file to backup your conversations
+- **Reset**: Delete the file to clear all chat history
+
+### Vector Database
+- **Location**: `data/vectordb/` (ChromaDB)
+- **Purpose**: Stores document embeddings for semantic search
+- **Privacy**: Also excluded from Git
+- **Reset**: Delete folder or use `--reset` flag when ingesting
+
+**Note**: Both databases are created automatically on first use. Each developer has their own local copies.
+
+---
 ## 🧪 Development & Testing
 Run tests (if/when added):
 ```powershell
