@@ -4,7 +4,11 @@ Assalamu alaykum wa rahmatullahi wa barakatuh.
 
 <div align="center">
 
+
+
 # Islamic RAG (Local · Private · Cited)
+
+
 
 <p>
 	<img src="https://visitor-badge.laobi.icu/badge?page_id=thechampusman.remove_flutter_dart_comments" alt="Visitor Count" />
@@ -19,7 +23,7 @@ Assalamu alaykum wa rahmatullahi wa barakatuh.
 	</a>
 </p>
 
-<!-- Author social badges moved to the Connect section below to keep the header clean. -->
+
 
 </div>
 
