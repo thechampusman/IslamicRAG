@@ -6,7 +6,7 @@
 
 > **Disclaimer:** This project is for educational reference. Answers are generated from your provided Islamic sources and clearly cited. It does **not** issue fatāwā. For specific rulings, always consult qualified scholars. If insufficient sources are found, a fallback answer (general Islamic knowledge) is labeled accordingly.
 
-<p align="center"><strong>License:</strong> Source-Available Contribute-Only (<code>LICENSE</code>) · No redistribution or public forks except for PRs.</p>
+<p align="center"><strong>License:</strong> Source-Available Contribute-Only (<a href="./LICENSE">view LICENSE</a>) · No redistribution or public forks except for PRs.</p>
 
 A local-first Retrieval-Augmented Generation (RAG) assistant focused on Islamic knowledge. It integrates with Ollama for chat + embeddings and serves a lightweight web UI for asking questions with source citations. When the knowledge base lacks relevant texts, the system falls back to model knowledge with a warning.
 
@@ -176,7 +176,15 @@ Suggested enhancements:
 
 ---
 ## 📜 License
-Add a `LICENSE` file (e.g., MIT or Apache-2.0) before public release.
+This project uses a custom Source-Available Contribute-Only License. You may:
+- Read and use the source locally
+- Submit improvements via Pull Requests
+
+You may not:
+- Redistribute the code publicly (forks must be PR-only)
+- Rebrand or sublicense
+
+See the full terms in [`LICENSE`](./LICENSE).
 
 ---
 ## 🙏 Acknowledgements
