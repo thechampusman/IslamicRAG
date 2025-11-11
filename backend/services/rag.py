@@ -40,13 +40,10 @@ async def generate_fallback_answer(question: str, max_tokens: int, temperature: 
     """Generate answer using model's own Islamic knowledge when no documents are found"""
     from backend.core.config import settings
     
-    FALLBACK_PROMPT = (
-        "You are an Islamic knowledge assistant. The user has asked a question but no specific Islamic texts were found in the database. "
-        "Answer the question using your general knowledge of Islam, Quran, and Hadith. "
-        "Be accurate and cite well-known sources if possible (e.g., 'Quran 2:255', 'Sahih Bukhari'). "
-        "Always emphasize consulting qualified scholars for specific rulings.\n\n"
+    prompt = (
+        "You are an Islamic knowledge assistant. Answer this question about Islam.\n\n"
         f"Question: {question}\n\n"
-        "Provide a helpful Islamic answer:"
+        "Provide a clear, accurate answer about Islamic teachings:"
     )
     
     async with httpx.AsyncClient(timeout=120) as client:
@@ -54,7 +51,7 @@ async def generate_fallback_answer(question: str, max_tokens: int, temperature: 
             f"{settings.ollama_base_url}/api/generate",
             json={
                 "model": settings.chat_model,
-                "prompt": FALLBACK_PROMPT,
+                "prompt": prompt,
                 "stream": False,
                 "options": {
                     "temperature": temperature,
