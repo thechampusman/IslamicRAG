@@ -21,6 +21,9 @@ Assalamu alaykum wa rahmatullahi wa barakatuh.
 	<a href="./LICENSE">
 		<img src="https://img.shields.io/badge/License-Source--Available-orange" alt="License" />
 	</a>
+	<a href="./CODE_OF_CONDUCT.md">
+		<img src="https://img.shields.io/badge/Code%20of%20Conduct-Islamic%20Values-blue" alt="Code of Conduct" />
+	</a>
 </p>
 
 
@@ -185,7 +188,9 @@ Potential future additions:
 
 ---
 ## 🤝 Contributing
-Contributions welcome! Please:
+Contributions welcome! Please read our [Code of Conduct](./CODE_OF_CONDUCT.md) before participating.
+
+Guidelines:
 - Focus on authenticity (cite reliable Islamic sources)
 - Avoid adding non-Islamic general knowledge as core data
 - Include tests for new logic where reasonable
@@ -196,6 +201,8 @@ Suggested enhancements:
 - BM25 + semantic hybrid ranking
 - Verse/hadith structured metadata extraction
 - Evaluation harness (Precision@K, MRR on curated QA pairs)
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
 
 ---
 ##  🔗 Connect

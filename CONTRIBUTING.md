@@ -2,6 +2,10 @@
 
 Thank you for your interest in contributing! This is a **source-available, contribute-only** project under a custom license (see `LICENSE`). Please read the guidelines below before opening issues or pull requests.
 
+## 🤝 Code of Conduct
+
+This project adheres to a [Code of Conduct](./CODE_OF_CONDUCT.md) that integrates Islamic values (adab, amānah, ikhlās) with professional community standards. By participating, you agree to uphold these principles. Please read it before contributing.
+
 ## 📜 License Acceptance
 By submitting a pull request you **affirm** that:
 1. You have read and agree to the `LICENSE` terms.
@@ -51,7 +55,7 @@ By submitting a pull request you **affirm** that:
 - `question`: Need clarification
 
 ## 💬 Communication
-Be respectful and professional. This project centers on preserving authenticity and scholarly integrity.
+Be respectful and professional. This project centers on preserving authenticity and scholarly integrity. Review our [Code of Conduct](./CODE_OF_CONDUCT.md) for detailed community standards.
 
 ## 📧 Contact
 Maintainer: usman gour (thechampusman)
