@@ -1,3 +1,7 @@
+Assalamu alaykum wa rahmatullahi wa barakatuh.
+
+I'm <strong>Usman Gour</strong> from Delhi, India. I enjoy working with large language models (LLMs) and retrieval-augmented generation (RAG), and I'm actively growing in AI while sharpening my mobile app development skills.
+
 <div align="center">
 
 # Islamic RAG (Local · Private · Cited)
