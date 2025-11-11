@@ -15,6 +15,14 @@
 	</a>
 </p>
 
+<p>
+	<strong>usman gour</strong> | <strong>thechampusman</strong><br/>
+	<a href="https://t.me/thechampusman"><img src="https://img.shields.io/badge/Telegram-@thechampusman-229ED9?logo=telegram" alt="Telegram" /></a>
+	<a href="https://instagram.com/thechampusman"><img src="https://img.shields.io/badge/Instagram-@thechampusman-E4405F?logo=instagram&logoColor=white" alt="Instagram" /></a>
+	<a href="https://www.linkedin.com/in/thechampusman/"><img src="https://img.shields.io/badge/LinkedIn-/in/thechampusman-0A66C2?logo=linkedin" alt="LinkedIn" /></a>
+	<a href="https://github.com/thechampusman"><img src="https://img.shields.io/badge/GitHub-thechampusman-181717?logo=github" alt="GitHub" /></a>
+</p>
+
 </div>
 
 > **Disclaimer:** This project is for educational reference. Answers are generated from your provided Islamic sources and clearly cited. It does **not** issue fatāwā. For specific rulings, always consult qualified scholars. If insufficient sources are found, a fallback answer (general Islamic knowledge) is labeled accordingly.

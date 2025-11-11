@@ -54,6 +54,15 @@ By submitting a pull request you **affirm** that:
 Be respectful and professional. This project centers on preserving authenticity and scholarly integrity.
 
 ## 📧 Contact
-For license questions or sensitive submissions: maintainer@example.com (replace with actual email).
+Maintainer: usman gour (thechampusman)
+
+For license questions or sensitive submissions, reach out via:
+
+<p>
+	<a href="https://t.me/thechampusman"><img src="https://img.shields.io/badge/Telegram-@thechampusman-229ED9?logo=telegram" alt="Telegram" /></a>
+	<a href="https://instagram.com/thechampusman"><img src="https://img.shields.io/badge/Instagram-@thechampusman-E4405F?logo=instagram&logoColor=white" alt="Instagram" /></a>
+	<a href="https://www.linkedin.com/in/thechampusman/"><img src="https://img.shields.io/badge/LinkedIn-/in/thechampusman-0A66C2?logo=linkedin" alt="LinkedIn" /></a>
+	<a href="https://github.com/thechampusman"><img src="https://img.shields.io/badge/GitHub-thechampusman-181717?logo=github" alt="GitHub" /></a>
+</p>
 
 Jazakum Allahu khayran for your contribution!
