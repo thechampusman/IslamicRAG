@@ -62,8 +62,9 @@ Instances of abusive, harassing, or otherwise unacceptable behavior may be repor
 
 **Usman Gour** (thechampusman)
 
+- **Email**: [usmangourworkid@gmail.com](mailto:usmangourworkid@gmail.com)
 - **Telegram**: [@thechampusman](https://t.me/thechampusman) (preferred for quick response)
-- **GitHub**: [@thechampusman](https://github.com/thechampusman) (private message or email)
+- **GitHub**: [@thechampusman](https://github.com/thechampusman) (private message)
 
 All complaints will be reviewed and investigated promptly and fairly. The project team is obligated to maintain confidentiality with regard to the reporter of an incident.
 

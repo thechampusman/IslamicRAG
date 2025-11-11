@@ -36,6 +36,7 @@ If you discover a security vulnerability in this project, please report it respo
 **Do NOT open a public GitHub issue for security vulnerabilities.**
 
 Instead, reach out privately via:
+- **Email:** [usmangourworkid@gmail.com](mailto:usmangourworkid@gmail.com)
 - **Telegram:** [@thechampusman](https://t.me/thechampusman)
 - **GitHub:** [thechampusman](https://github.com/thechampusman) (private message or security advisory)
 

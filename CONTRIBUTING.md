@@ -62,6 +62,8 @@ Maintainer: usman gour (thechampusman)
 
 For license questions or sensitive submissions, reach out via:
 
+**Email:** [usmangourworkid@gmail.com](mailto:usmangourworkid@gmail.com)
+
 <p>
 	<a href="https://t.me/thechampusman"><img src="https://img.shields.io/badge/Telegram-@thechampusman-229ED9?logo=telegram" alt="Telegram" /></a>
 	<a href="https://instagram.com/thechampusman"><img src="https://img.shields.io/badge/Instagram-@thechampusman-E4405F?logo=instagram&logoColor=white" alt="Instagram" /></a>
