@@ -3,21 +3,120 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Islamic RAG</title>
+  <title>Islamic RAG - Local Islamic Knowledge Assistant</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="container">
-    <h1>Islamic RAG</h1>
-    <div id="chat">
-      <div id="messages"></div>
-      <form id="chat-form">
-        <input id="question" type="text" placeholder="Ask a question…" autocomplete="off" required />
-        <button type="submit">Ask</button>
-      </form>
+  <!-- Mobile Menu Toggle -->
+  <button class="mobile-menu-toggle" id="mobileMenuToggle">☰</button>
+  
+  <!-- Theme Toggle (Top Right) -->
+  <button class="theme-toggle-btn" id="themeToggle">
+    <span class="theme-icon">🌙</span>
+  </button>
+  
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>Islamic RAG</h2>
+      <p class="subtitle">Local · Private · Cited</p>
     </div>
-    <div id="citations"></div>
-  </div>
+    
+    <button class="new-chat-btn" id="newChatBtn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      New Chat
+    </button>
+
+    <div class="chat-history" id="chatHistory">
+      <!-- Chat history items will be added here -->
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="info-badge rag-mode">
+        <span class="badge-icon">📚</span>
+        <span>RAG Mode</span>
+      </div>
+      <div class="info-badge">
+        <span class="badge-icon">🔒</span>
+        <span>Local & Private</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Chat Area -->
+  <main class="main-content">
+    <div class="chat-container">
+      <!-- Welcome Screen -->
+      <div class="welcome-screen" id="welcomeScreen">
+        <div class="welcome-content">
+          <h1 class="welcome-title">Assalamu alaykum</h1>
+          <p class="welcome-subtitle">Ask questions about Islam based on your ingested sources</p>
+          
+          <div class="example-prompts">
+            <div class="example-prompt" data-prompt="What is Tawheed?">
+              <span class="prompt-icon">🕌</span>
+              <div>
+                <div class="prompt-title">Islamic Theology</div>
+                <div class="prompt-text">What is Tawheed?</div>
+              </div>
+            </div>
+            <div class="example-prompt" data-prompt="Explain the importance of Salah">
+              <span class="prompt-icon">🤲</span>
+              <div>
+                <div class="prompt-title">Worship & Practice</div>
+                <div class="prompt-text">Explain the importance of Salah</div>
+              </div>
+            </div>
+            <div class="example-prompt" data-prompt="What does the Quran say about patience?">
+              <span class="prompt-icon">📖</span>
+              <div>
+                <div class="prompt-title">Quranic Guidance</div>
+                <div class="prompt-text">What does the Quran say about patience?</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Messages Container -->
+      <div class="messages-container" id="messagesContainer">
+        <!-- Messages will be added here -->
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="input-container">
+      <form class="input-form" id="chatForm">
+        <div class="input-wrapper">
+          <textarea 
+            id="questionInput" 
+            placeholder="Ask about Islam..." 
+            rows="1"
+            autocomplete="off"
+            required
+          ></textarea>
+          <button type="submit" class="send-btn" id="sendBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+      </form>
+      <p class="input-disclaimer">
+        Answers are from your ingested Islamic sources. Always verify with scholars for important rulings.
+      </p>
+    </div>
+  </main>
+
   <script src="app.js"></script>
 </body>
 </html>
