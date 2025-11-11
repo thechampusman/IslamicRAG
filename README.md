@@ -198,7 +198,7 @@ Suggested enhancements:
 - Evaluation harness (Precision@K, MRR on curated QA pairs)
 
 ---
-## � Connect
+##  🔗 Connect
 
 Maintainer: <strong>Usman Gour</strong> (<em>thechampusman</em>) — Delhi, India
 
@@ -210,7 +210,7 @@ Maintainer: <strong>Usman Gour</strong> (<em>thechampusman</em>) — Delhi, Indi
 </p>
 
 ---
-## �📜 License
+##  📜 License
 This project uses a custom Source-Available Contribute-Only License. You may:
 - Read and use the source locally
 - Submit improvements via Pull Requests
