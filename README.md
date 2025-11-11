@@ -3,9 +3,7 @@
 # Islamic RAG (Local · Private · Cited)
 
 <p>
-	<a href="https://hits.seeyoufarm.com">
-		<img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fthechampusman%2FIslamicRAG&count_bg=%2321C8A5&title_bg=%23555555&icon=github.svg&icon_color=%23FFFFFF&title=views&edge_flat=false" alt="views" />
-	</a>
+	<img src="https://visitor-badge.laobi.icu/badge?page_id=thechampusman.remove_flutter_dart_comments" alt="Visitor Count" />
 	<img src="https://img.shields.io/badge/Python-3.11%2B-blue?logo=python&logoColor=white" alt="Python 3.11+" />
 	<img src="https://img.shields.io/badge/AI-Local%20LLM-8A2BE2" alt="AI Local LLM" />
 	<img src="https://img.shields.io/badge/RAG-Citations-green" alt="RAG with citations" />
