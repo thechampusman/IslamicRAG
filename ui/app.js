@@ -62,6 +62,16 @@ function setupEventListeners() {
   questionInput.addEventListener('input', () => {
     sendBtn.disabled = !questionInput.value.trim();
   });
+  
+  // Keyboard handling: Enter to send, Shift+Enter for new line
+  questionInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (questionInput.value.trim()) {
+        handleSubmit(e);
+      }
+    }
+  });
 }
 
 function toggleTheme() {
