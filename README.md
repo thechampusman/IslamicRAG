@@ -46,6 +46,38 @@ A local-first Retrieval-Augmented Generation (RAG) assistant focused on Islamic 
 - Explicit citations with file source & snippet context
 
 ---
+## ✨ What's New (Recent Updates)
+
+These improvements were added during the recent development cycle:
+
+- UI/UX
+	- Dark/Light theme toggle (top-right) with localStorage persistence
+	- Fully responsive layout with mobile sidebar and overlay
+	- Structured message rendering (paragraphs, lists, headings, inline bold/italic/code)
+	- Improved fallback banner color for better contrast
+	- Keyboard shortcuts: Enter = send, Shift+Enter = new line
+
+- Chat History (Local, Private)
+	- SQLite database at `data/chathistory.db` for chats and messages
+	- Backend CRUD endpoints: create/list/get/delete chats and messages
+	- Frontend integration: loads history on startup, supports delete
+	- Privacy: database excluded via `.gitignore`
+
+- Model Behavior & Prompts
+	- Simplified and de-triggered system/fallback prompts to avoid refusals
+	- Switched to an uncensored local model for educational answers
+	- Direct ruling classifier for halal/haram questions:
+		- Example: "is zina halal or haram" → "It is haram. Do you want to know why?"
+		- Example: "is nikah haram" → "It is halal. Do you want to know why?"
+	- Response modes exposed: `direct` (ruling), `rag` (with citations), `fallback` (general)
+
+- Networking & UX polish
+	- Client-side request cancellation via AbortController (tab close/new question)
+	- Safer HTML rendering with escaping
+
+See files: `backend/services/generator.py`, `backend/services/rag.py`, `backend/db/chatdb.py`, `ui/app.js`, `ui/index.html`, `ui/styles.css`.
+
+---
 ## 🏛 Architecture (Conceptual)
 1. **Ingestion**: Files in `data/raw` → chunking → embeddings via Ollama → stored in Chroma
 2. **Retrieval**: Semantic similarity search returns top-k passages
@@ -93,7 +125,7 @@ A local-first Retrieval-Augmented Generation (RAG) assistant focused on Islamic 
 1) Pull models (choose ones you want):
 
 ```powershell
-ollama pull llama3.1:8b
+ollama pull wizard-vicuna-uncensored:13b
 ollama pull nomic-embed-text
 ```
 
@@ -155,10 +187,28 @@ Example ask (PowerShell):
 Invoke-RestMethod -Uri "http://localhost:8000/ask" -Method POST -Body '{"question":"What is Taqdeer?"}' -ContentType 'application/json'
 ```
 
+### Direct halal/haram rulings
+For questions that explicitly contain the words "halal" or "haram", the API returns a concise response immediately:
+
+Request:
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8000/ask" -Method POST -ContentType 'application/json' -Body '{"question":"is alcohol haram?"}'
+```
+Response:
+```json
+{
+	"answer": "It is haram. Do you want to know why?",
+	"mode": "direct",
+	"citations": []
+}
+```
+Follow up with "why" to get a full scholarly explanation.
+
 ---
 ## 🧠 Retrieval vs Fallback Modes
 - **RAG (`mode: rag`)**: Retrieved passages above relevance threshold power the answer (citations included).
 - **Fallback (`mode: fallback`)**: No passages meet threshold → model answers from general Islamic knowledge with a visible banner.
+- **Direct (`mode: direct`)**: Halal/haram classification questions return an immediate ruling sentence.
 
 ---
 ## 🛡 Islamic Authenticity & Guardrails
@@ -188,6 +238,14 @@ Invoke-RestMethod -Uri "http://localhost:8000/ask" -Method POST -Body '{"questio
 - **Reset**: Delete folder or use `--reset` flag when ingesting
 
 **Note**: Both databases are created automatically on first use. Each developer has their own local copies.
+
+---
+## 🔧 Configuration Notes
+
+- Change chat model in `backend/core/config.py`:
+	- `chat_model: "wizard-vicuna-uncensored:13b"` (current default for uncensored, educational use)
+- Abort in-flight requests in UI when navigating or asking a new question (saves compute)
+- To improve accuracy, ingest more authoritative Islamic sources into `data/raw` and rerun ingestion
 
 ---
 ## 🧪 Development & Testing

@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     environment: str = "dev"
     port: int = 8000
     ollama_base_url: str = "http://localhost:11434"
-    chat_model: str = "qwen3:8b"
+    chat_model: str = "wizard-vicuna-uncensored:13b"
     embedding_model: str = "nomic-embed-text"
     top_k: int = 4
     max_generated_tokens: int = 512
