@@ -1,6 +1,6 @@
 Assalamu alaykum wa rahmatullahi wa barakatuh.
 
-I'm <strong>Usman Gour</strong> from Delhi, India. I enjoy working with large language models (LLMs) and retrieval-augmented generation (RAG), and I'm actively growing in AI while sharpening my mobile app development skills.
+<em>By <strong>Usman Gour</strong> (thechampusman) — Delhi, India. Exploring LLMs/RAG and sharpening mobile app development skills.</em>
 
 <div align="center">
 
@@ -19,13 +19,7 @@ I'm <strong>Usman Gour</strong> from Delhi, India. I enjoy working with large la
 	</a>
 </p>
 
-<p>
-	<strong>usman gour</strong> | <strong>thechampusman</strong><br/>
-	<a href="https://t.me/thechampusman"><img src="https://img.shields.io/badge/Telegram-@thechampusman-229ED9?logo=telegram" alt="Telegram" /></a>
-	<a href="https://instagram.com/thechampusman"><img src="https://img.shields.io/badge/Instagram-@thechampusman-E4405F?logo=instagram&logoColor=white" alt="Instagram" /></a>
-	<a href="https://www.linkedin.com/in/thechampusman/"><img src="https://img.shields.io/badge/LinkedIn-/in/thechampusman-0A66C2?logo=linkedin" alt="LinkedIn" /></a>
-	<a href="https://github.com/thechampusman"><img src="https://img.shields.io/badge/GitHub-thechampusman-181717?logo=github" alt="GitHub" /></a>
-</p>
+<!-- Author social badges moved to the Connect section below to keep the header clean. -->
 
 </div>
 
@@ -200,7 +194,19 @@ Suggested enhancements:
 - Evaluation harness (Precision@K, MRR on curated QA pairs)
 
 ---
-## 📜 License
+## � Connect
+
+Maintainer: <strong>Usman Gour</strong> (<em>thechampusman</em>) — Delhi, India
+
+<p>
+	<a href="https://t.me/thechampusman"><img src="https://img.shields.io/badge/Telegram-@thechampusman-229ED9?logo=telegram" alt="Telegram" /></a>
+	<a href="https://instagram.com/thechampusman"><img src="https://img.shields.io/badge/Instagram-@thechampusman-E4405F?logo=instagram&logoColor=white" alt="Instagram" /></a>
+	<a href="https://www.linkedin.com/in/thechampusman/"><img src="https://img.shields.io/badge/LinkedIn-/in/thechampusman-0A66C2?logo=linkedin" alt="LinkedIn" /></a>
+	<a href="https://github.com/thechampusman"><img src="https://img.shields.io/badge/GitHub-thechampusman-181717?logo=github" alt="GitHub" /></a>
+</p>
+
+---
+## �📜 License
 This project uses a custom Source-Available Contribute-Only License. You may:
 - Read and use the source locally
 - Submit improvements via Pull Requests
