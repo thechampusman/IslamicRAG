@@ -55,6 +55,12 @@ body {
   overflow-y: auto;
 }
 
+/* Ensure sidebar content isn't hidden under fixed footer */
+.sidebar { padding-bottom: 64px; }
+@supports (padding: max(0px)) {
+  .sidebar { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0)); }
+}
+
 .sidebar-header {
   margin-bottom: 1.5rem;
 }
@@ -134,6 +140,150 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.branding-block {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mode-switch {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.7rem;
+}
+
+.mode-label { color: var(--text-secondary); font-weight: 500; }
+
+.mode-select {
+  flex: 1;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+}
+
+.mode-select:focus { outline: 1px solid var(--accent); }
+
+.branding-name {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.2;
+}
+
+/* Prayer times card */
+.prayer-times-card {
+  margin: 0 0 1.5rem 0;
+  padding: 0.75rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  width: 100%;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 2px 6px var(--shadow);
+}
+.pt-header { font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; }
+.pt-basis { font-size: 0.65rem; color: var(--text-secondary); margin-bottom: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.25rem; align-items: center; }
+.pt-link { background: transparent; border: none; color: var(--accent); cursor: pointer; font-size: 0.65rem; padding: 0; text-decoration: underline; }
+.pt-link:hover { color: var(--accent-hover); }
+.pt-tz { font-weight: 600; color: var(--text-dim); }
+.pt-controls { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+.pt-btn {
+  padding: 0.375rem 0.5rem; font-size: 0.75rem; cursor: pointer;
+  border-radius: 0.375rem; border: 1px solid var(--border-color);
+  background: var(--bg-secondary); color: var(--text-primary);
+}
+.pt-btn:hover { background: var(--bg-tertiary); }
+.pt-select { flex: 1; font-size: 0.7rem; background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 0.375rem; padding: 0.25rem; }
+.pt-grid { display: grid; grid-template-columns: 1fr; gap: 0.25rem; }
+.pt-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.8125rem; padding: 0.25rem 0.25rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 0.375rem; }
+.pt-row span:last-child { color: var(--text-secondary); font-weight: 600; }
+.pt-meta { margin-top: 0.375rem; font-size: 0.7rem; color: var(--text-secondary); }
+
+.branding-links {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.branding-link {
+  font-size: 0.6875rem;
+  padding: 0.375rem 0.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.branding-link:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border-color: var(--accent);
+}
+
+.branding-footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  color: var(--text-dim);
+  text-align: center;
+  font-size: 0.75rem;
+  min-height: 48px; /* ~1-2 cm visual height depending on DPI */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.75rem;
+  z-index: 20;
+}
+
+@supports (padding: max(0px)) {
+  .branding-footer { padding-bottom: max(0px, env(safe-area-inset-bottom, 0)); }
+}
+
+.branding-footer a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+@media (max-width: 480px) {
+  .branding-footer {
+    min-height: 40px;
+    font-size: 0.6875rem;
+  }
+}
+
+/* Reserve space above fixed footer so input doesn't overlap */
+.input-container { margin-bottom: 48px; }
+@supports (margin-bottom: max(0px)) {
+  .input-container { margin-bottom: calc(48px + env(safe-area-inset-bottom, 0)); }
+}
+
+@media (max-width: 480px) {
+  .input-container { margin-bottom: 40px; }
+  @supports (margin-bottom: max(0px)) {
+    .input-container { margin-bottom: calc(40px + env(safe-area-inset-bottom, 0)); }
+  }
 }
 
 .info-badge {
@@ -442,6 +592,60 @@ body {
   color: #EA580C;
 }
 
+/* Web source badge */
+.web-source-badge {
+  margin-top: 1rem;
+  padding: 0.875rem 1rem;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  border-radius: 0.5rem;
+  color: #60A5FA;
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: flex;
+  align-items: start;
+  gap: 0.75rem;
+  line-height: 1.5;
+}
+
+.web-source-badge span {
+  font-size: 1.125rem;
+  flex-shrink: 0;
+}
+
+[data-theme="dark"] .web-source-badge {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #60A5FA;
+}
+
+[data-theme="light"] .web-source-badge {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #2563EB;
+}
+
+/* Curated source badge */
+.curated-badge {
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: 0.5rem;
+  color: #10B981;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: start;
+  gap: 0.6rem;
+  line-height: 1.5;
+}
+
+.curated-badge span {
+  font-size: 1.05rem;
+  flex-shrink: 0;
+}
+
 /* Loading */
 .loading {
   display: flex;
@@ -622,6 +826,8 @@ body {
     padding: 5rem 0.75rem 1rem;
   }
 
+  .messages-container { gap: 1rem; }
+
   .example-prompts {
     grid-template-columns: 1fr;
   }
@@ -675,6 +881,15 @@ body {
   #questionInput {
     font-size: 0.9375rem;
   }
+}
+
+/* Ultra small devices tweaks */
+@media (max-width: 360px) {
+  .new-chat-btn { padding: 0.5rem; font-size: 0.8125rem; }
+  .mode-select { font-size: 0.65rem; }
+  .input-wrapper { padding: 0.5rem 0.75rem; }
+  #questionInput { font-size: 0.9rem; }
+  .send-btn { width: 32px; height: 32px; }
 }
 
 /* Sidebar overlay for mobile */

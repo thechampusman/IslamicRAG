@@ -48,6 +48,21 @@
         <span class="badge-icon">🔒</span>
         <span>Local & Private</span>
       </div>
+    
+      <button class="new-chat-btn" id="newChatBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        New Chat
+      </button>
+      <div class="mode-switch">
+        <label for="modelMode" class="mode-label">Mode:</label>
+        <select id="modelMode" class="mode-select" aria-label="Model censorship mode">
+          <option value="uncensored">Uncensored</option>
+          <option value="censored">Censored</option>
+        </select>
+      </div>
     </div>
   </aside>
 
@@ -60,6 +75,35 @@
           <h1 class="welcome-title">Assalamu alaykum</h1>
           <p class="welcome-subtitle">Ask questions about Islam based on your ingested sources</p>
           
+          <div class="prayer-times-card">
+            <div class="pt-header">Today's Prayer Times</div>
+            <div class="pt-basis" id="ptBasisLine">
+              <span id="ptBasisText">Based on: Muslim World League</span> <span id="ptTzOffset" class="pt-tz"></span>
+            </div>
+            <div class="pt-controls">
+              <button id="btnUseLocation" class="pt-btn">📍 Use My Location</button>
+              <select id="ptMethod" class="pt-select" title="Calc method">
+                <option value="MWL" selected>MWL</option>
+                <option value="ISNA">ISNA</option>
+                <option value="EGYPT">Egypt</option>
+                <option value="UMM_AL_QURA">Umm al-Qura</option>
+                <option value="KARACHI">Karachi (University of Islamic Sciences)</option>
+              </select>
+              <select id="ptAsr" class="pt-select" title="Asr method">
+                <option value="standard" selected>Asr: Standard</option>
+                <option value="hanafi">Asr: Hanafi</option>
+              </select>
+            </div>
+            <div id="ptTimes" class="pt-grid">
+              <div class="pt-row"><span>Fajr</span><span>--:--</span></div>
+              <div class="pt-row"><span>Sunrise</span><span>--:--</span></div>
+              <div class="pt-row"><span>Dhuhr</span><span>--:--</span></div>
+              <div class="pt-row"><span>Asr</span><span>--:--</span></div>
+              <div class="pt-row"><span>Maghrib</span><span>--:--</span></div>
+              <div class="pt-row"><span>Isha</span><span>--:--</span></div>
+            </div>
+            <div class="pt-meta" id="ptMeta"></div>
+          </div>
           <div class="example-prompts">
             <div class="example-prompt" data-prompt="What is Tawheed?">
               <span class="prompt-icon">🕌</span>
@@ -117,5 +161,8 @@
   </main>
 
   <script src="app.js"></script>
+  <div class="branding-footer">
+    <span>© Usman Gour • <a href="https://github.com/thechampusman/IslamicRAG" target="_blank" rel="noopener">GitHub</a> • <a href="https://www.linkedin.com/in/thechampusman/" target="_blank" rel="noopener">LinkedIn</a></span>
+  </div>
 </body>
 </html>

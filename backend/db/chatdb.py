@@ -35,10 +35,21 @@ class ChatDB:
                     content TEXT NOT NULL,
                     citations TEXT,
                     is_fallback BOOLEAN DEFAULT 0,
+                    mode TEXT,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE
                 )
             """)
+
+            # Lightweight migration: ensure 'mode' column exists (older DBs may miss it)
+            try:
+                cur = conn.execute("PRAGMA table_info(messages)")
+                cols = [row[1] for row in cur.fetchall()]
+                if 'mode' not in cols:
+                    conn.execute("ALTER TABLE messages ADD COLUMN mode TEXT")
+            except Exception:
+                # Ignore migration failure; better to continue than crash
+                pass
             
             conn.execute("""
                 CREATE INDEX IF NOT EXISTS idx_messages_chat_id 
@@ -76,16 +87,17 @@ class ChatDB:
         role: str, 
         content: str,
         citations: Optional[List[Dict]] = None,
-        is_fallback: bool = False
+        is_fallback: bool = False,
+        mode: Optional[str] = None
     ) -> int:
         """Add a message to a chat."""
         citations_json = json.dumps(citations) if citations else None
         
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.execute(
-                """INSERT INTO messages (chat_id, role, content, citations, is_fallback)
-                   VALUES (?, ?, ?, ?, ?)""",
-                (chat_id, role, content, citations_json, is_fallback)
+                """INSERT INTO messages (chat_id, role, content, citations, is_fallback, mode)
+                   VALUES (?, ?, ?, ?, ?, ?)""",
+                (chat_id, role, content, citations_json, is_fallback, mode)
             )
             
             # Update chat's updated_at
@@ -113,7 +125,7 @@ class ChatDB:
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.execute(
-                """SELECT id, role, content, citations, is_fallback, created_at
+                """SELECT id, role, content, citations, is_fallback, mode, created_at
                    FROM messages 
                    WHERE chat_id = ? 
                    ORDER BY created_at ASC""",

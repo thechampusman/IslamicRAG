@@ -1,0 +1,52 @@
+[
+  {
+    "id": "dua-success-1",
+    "title": "Rabbana atina fid-dunya hasanah",
+    "tags": ["success", "exam", "study", "life"],
+    "arabic": "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ",
+    "transliteration": "Rabbana atina fid-dunya hasanatan wa fil-akhirati hasanatan wa qina 'adhab an-nar",
+    "translation": "Our Lord, give us in this world good and in the Hereafter good and protect us from the punishment of the Fire.",
+    "source": "Quran",
+    "reference": "2:201"
+  },
+  {
+    "id": "dua-success-2",
+    "title": "Rabbi ishrah li sadri (for clarity and ease)",
+    "tags": ["success", "exam", "study", "knowledge"],
+    "arabic": "رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي وَاحْلُلْ عُقْدَةً مِنْ لِسَانِي يَفْقَهُوا قَوْلِي",
+    "transliteration": "Rabbi ishrah li sadri. Wa yassir li amri. Wahlul ‘uqdatan min lisani. Yafqahu qawli",
+    "translation": "My Lord, expand for me my chest. And ease for me my task. And untie the knot from my tongue. That they may understand my speech.",
+    "source": "Quran",
+    "reference": "20:25-28"
+  },
+  {
+    "id": "dua-success-3",
+    "title": "Rabbi zidni ilma (increase me in knowledge)",
+    "tags": ["success", "exam", "study", "knowledge"],
+    "arabic": "رَّبِّ زِدْنِي عِلْمًا",
+    "transliteration": "Rabbi zidni ilma",
+    "translation": "My Lord, increase me in knowledge.",
+    "source": "Quran",
+    "reference": "20:114"
+  },
+  {
+    "id": "dua-forgiveness-1",
+    "title": "Rabbana ighfir lana",
+    "tags": ["forgiveness", "tawbah"],
+    "arabic": "رَبَّنَا فَاغْفِرْ لَنَا ذُنُوبَنَا وَكَفِّرْ عَنَّا سَيِّئَاتِنَا وَتَوَفَّنَا مَعَ الْأَبْرَارِ",
+    "transliteration": "Rabbana ighfir lana dhunubana wa kaffir 'anna sayyiatina wa tawaffana ma'al abrar",
+    "translation": "Our Lord, forgive us our sins and remove from us our misdeeds and cause us to die with the righteous.",
+    "source": "Quran",
+    "reference": "3:193"
+  },
+  {
+    "id": "dua-travel-1",
+    "title": "Subhanalladhi sakhkhara lana",
+    "tags": ["travel", "journey"],
+    "arabic": "سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَٰذَا وَمَا كُنَّا لَهُ مُقْرِنِينَ وَإِنَّا إِلَىٰ رَبِّنَا لَمُنْقَلِبُونَ",
+    "transliteration": "Subhanalladhi sakhkhara lana hadha wa ma kunna lahu muqrinin. Wa inna ila rabbina lamunqalibun",
+    "translation": "Glory to Him who has subjected this (to us), and we could never have accomplished it (by ourselves). And to our Lord surely we must return.",
+    "source": "Quran",
+    "reference": "43:13-14"
+  }
+]

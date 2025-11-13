@@ -9,6 +9,10 @@ from backend.db.vectordb import reset_collection
 from backend.db.chatdb import ChatDB
 from scripts.ingest import main as ingest_main
 from backend.core.logging import logger
+from backend.services.model_manager import get_mode, set_mode, get_active_model
+from backend.services.prayer_times import compute_prayer_times
+from datetime import date
+from typing import Optional
 
 app = FastAPI(title="Islamic RAG API", version="0.1.0")
 
@@ -25,7 +29,7 @@ app.add_middleware(
 
 @app.get("/health")
 async def health():
-    return {"status": "ok"}
+    return {"status": "ok", "mode": get_mode(), "model": get_active_model()}
 
 @app.post("/ask")
 async def ask(req: AskRequest):
@@ -34,6 +38,8 @@ async def ask(req: AskRequest):
         top_k=req.top_k or settings.top_k,
         max_tokens=req.max_tokens or settings.max_generated_tokens,
         temperature=req.temperature or settings.temperature,
+        use_web=req.use_web or False,
+        web_urls=req.web_urls or [],
     )
     
     # Save to chat history if chat_id provided
@@ -51,7 +57,8 @@ async def ask(req: AskRequest):
                 "assistant",
                 res.get("answer", ""),
                 citations=res.get("citations"),
-                is_fallback=(res.get("mode") == "fallback")
+                is_fallback=(res.get("mode") == "fallback"),
+                mode=res.get("mode")
             )
             
             # Update title if it's the first message
@@ -63,6 +70,27 @@ async def ask(req: AskRequest):
             logger.error(f"Error saving to chat history: {e}")
     
     return res
+
+@app.get("/model/mode")
+async def read_mode():
+    return {"mode": get_mode(), "model": get_active_model()}
+
+from pydantic import BaseModel
+
+class ModeUpdate(BaseModel):
+    mode: str
+
+@app.post("/model/mode")
+async def update_mode(payload: ModeUpdate):
+    m = payload.mode.lower().strip()
+    if m not in ("censored", "uncensored"):
+        raise HTTPException(status_code=400, detail="Mode must be 'censored' or 'uncensored'")
+    try:
+        set_mode(m)  # switch runtime mode
+        return {"mode": get_mode(), "model": get_active_model()}
+    except Exception as e:
+        logger.error(f"Error switching mode: {e}")
+        raise HTTPException(status_code=500, detail="Failed to switch mode")
 
 @app.post("/ingest")
 async def ingest(req: IngestRequest):
@@ -169,6 +197,34 @@ async def update_chat_title(chat_id: str, title: str):
     except Exception as e:
         logger.error(f"Error updating title: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+# Prayer timetable endpoint
+@app.get("/prayer-times")
+async def get_prayer_times(lat: float, lon: float, tz: Optional[str] = "Asia/Kolkata", method: Optional[str] = "MWL", asr: Optional[str] = "standard"):
+    try:
+        times = compute_prayer_times(lat, lon, date.today(), tz_name=tz or "Asia/Kolkata", method=method or "MWL", asr=asr or "standard")
+        # Format to HH:MM for the API response
+        def fmt(dt):
+            return dt.strftime("%I:%M %p")
+        return {
+            "date": date.today().isoformat(),
+            "method": times["metadata"]["method"],
+            "method_label": times["metadata"].get("method_label"),
+            "asr": times["metadata"]["asr"],
+            "tz": times["metadata"]["tz"],
+            "offset_min": times["metadata"].get("offset_min"),
+            "times": {
+                "Fajr": fmt(times["Fajr"]),
+                "Sunrise": fmt(times["Sunrise"]),
+                "Dhuhr": fmt(times["Dhuhr"]),
+                "Asr": fmt(times["Asr"]),
+                "Maghrib": fmt(times["Maghrib"]),
+                "Isha": fmt(times["Isha"]),
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error computing prayer times: {e}")
+        raise HTTPException(status_code=500, detail="Failed to compute prayer times")
 
 # Serve static UI if available
 ui_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "ui")

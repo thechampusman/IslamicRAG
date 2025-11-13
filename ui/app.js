@@ -14,6 +14,7 @@ const themeToggle = document.getElementById('themeToggle');
 const mobileMenuToggle = document.getElementById('mobileMenuToggle');
 const sidebar = document.getElementById('sidebar');
 const sidebarOverlay = document.getElementById('sidebarOverlay');
+const modelModeSelect = document.getElementById('modelMode');
 
 // State
 let currentChatId = null;
@@ -54,6 +55,124 @@ function setupEventListeners() {
   
   // Form Submit
   chatForm.addEventListener('submit', handleSubmit);
+
+  // Mode switch
+  if (modelModeSelect) {
+    modelModeSelect.addEventListener('change', async (e) => {
+      const mode = e.target.value;
+      try {
+        await fetch(`${API_BASE}/model/mode`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode })
+        });
+      } catch (err) {
+        console.error('Failed to switch mode', err);
+        alert('Failed to switch model mode');
+      }
+    });
+    // Load initial mode
+    fetch(`${API_BASE}/model/mode`).then(r => r.json()).then(data => {
+      if (data.mode) modelModeSelect.value = data.mode;
+    }).catch(()=>{});
+  }
+
+  // Prayer times widget
+  const btnUseLocation = document.getElementById('btnUseLocation');
+  const ptMethod = document.getElementById('ptMethod');
+  const ptAsr = document.getElementById('ptAsr');
+  const ptTimes = document.getElementById('ptTimes');
+  const ptMeta = document.getElementById('ptMeta');
+  if (btnUseLocation && ptMethod && ptAsr && ptTimes) {
+    const updateTimes = (resp) => {
+      const order = ['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'];
+      const rows = ptTimes.querySelectorAll('.pt-row');
+      order.forEach((name, i) => {
+        const row = rows[i];
+        if (!row) return;
+        row.children[1].textContent = resp?.times?.[name] || '--:--';
+      });
+      if (ptMeta) ptMeta.textContent = `${resp?.method || ''} • ${resp?.asr || ''} • ${resp?.tz || ''}`;
+      const basisText = document.getElementById('ptBasisText');
+      const tzOffsetEl = document.getElementById('ptTzOffset');
+      if (basisText) basisText.textContent = `Based on: ${resp?.method_label || resp?.method || ''}`;
+      if (tzOffsetEl) {
+        const min = resp?.offset_min;
+        if (typeof min === 'number') {
+          const sign = min >= 0 ? '+' : '-';
+          const absMin = Math.abs(min);
+          const hh = String(Math.floor(absMin / 60)).padStart(2,'0');
+          const mm = String(absMin % 60).padStart(2,'0');
+          tzOffsetEl.textContent = `GMT${sign}${hh}:${mm}`;
+        } else {
+          tzOffsetEl.textContent = 'GMT';
+        }
+      }
+    };
+
+    let lastCoords = null;
+
+    // Load saved preferences
+    const savedMethod = localStorage.getItem('pt_method');
+    const savedAsr = localStorage.getItem('pt_asr');
+    const savedLat = localStorage.getItem('pt_lat');
+    const savedLon = localStorage.getItem('pt_lon');
+    if (savedMethod && [...ptMethod.options].some(o=>o.value===savedMethod)) {
+      ptMethod.value = savedMethod;
+    }
+    if (savedAsr && [...ptAsr.options].some(o=>o.value===savedAsr)) {
+      ptAsr.value = savedAsr;
+    }
+    if (savedLat && savedLon) {
+      lastCoords = { lat: parseFloat(savedLat), lon: parseFloat(savedLon) };
+      // Auto-fetch with saved data
+      fetchTimes(lastCoords.lat, lastCoords.lon);
+    }
+
+    const fetchTimes = async (lat, lon) => {
+      try {
+        const tz = Intl?.DateTimeFormat?.().resolvedOptions?.().timeZone || '';
+        const url = `${API_BASE}/prayer-times?lat=${lat}&lon=${lon}&method=${encodeURIComponent(ptMethod.value)}&asr=${encodeURIComponent(ptAsr.value)}${tz ? `&tz=${encodeURIComponent(tz)}` : ''}`;
+        const resp = await fetch(url);
+        const data = await resp.json();
+        updateTimes(data);
+        // Persist settings & coords
+        localStorage.setItem('pt_method', ptMethod.value);
+        localStorage.setItem('pt_asr', ptAsr.value);
+        localStorage.setItem('pt_lat', String(lat));
+        localStorage.setItem('pt_lon', String(lon));
+      } catch (e) {
+        console.error('Failed to fetch prayer times', e);
+      }
+    };
+
+    btnUseLocation.addEventListener('click', () => {
+      if (!navigator.geolocation) {
+        alert('Geolocation not supported');
+        return;
+      }
+      navigator.geolocation.getCurrentPosition((pos) => {
+        lastCoords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+        fetchTimes(lastCoords.lat, lastCoords.lon);
+      }, (err) => {
+        alert('Location denied. Please allow access to fetch local prayer times.');
+      });
+    });
+
+    ptMethod.addEventListener('change', () => {
+      if (lastCoords) fetchTimes(lastCoords.lat, lastCoords.lon);
+      else {
+        // Persist method even without coords (will fetch once location added)
+        localStorage.setItem('pt_method', ptMethod.value);
+      }
+    });
+    ptAsr.addEventListener('change', () => {
+      if (lastCoords) fetchTimes(lastCoords.lat, lastCoords.lon);
+      else {
+        localStorage.setItem('pt_asr', ptAsr.value);
+      }
+    });
+  }
   
   // Input auto-resize
   questionInput.addEventListener('input', autoResizeTextarea);
@@ -175,7 +294,7 @@ async function handleSubmit(e) {
     removeLoadingMessage(loadingId);
     
     // Add assistant message
-    addMessage('assistant', data.answer, data.citations, data.mode === 'fallback');
+    addMessage('assistant', data.answer, data.citations, data.mode === 'fallback', data.mode);
     
     // Update chat title if first message
     const chat = chats.find(c => c.id === currentChatId);
@@ -220,7 +339,7 @@ async function loadChatHistory() {
   }
 }
 
-function addMessage(role, text, citations = null, isFallback = false) {
+function addMessage(role, text, citations = null, isFallback = false, mode = 'rag') {
   const messageDiv = document.createElement('div');
   messageDiv.className = `message ${role}`;
   
@@ -238,6 +357,22 @@ function addMessage(role, text, citations = null, isFallback = false) {
   textDiv.className = 'message-text';
   textDiv.innerHTML = formatMessageText(text);
   content.appendChild(textDiv);
+  
+  // Web source indicator
+  if (mode === 'rag-web') {
+    const webBadge = document.createElement('div');
+    webBadge.className = 'web-source-badge';
+    webBadge.innerHTML = '<span>🌐</span><div>Answer sourced from web (ephemeral)</div>';
+    content.appendChild(webBadge);
+  }
+  
+  // Curated source indicator (e.g., Quran/Hadith-backed dua answers)
+  if (mode === 'rag' && Array.isArray(citations) && citations.some(c => /^(Quran|Hadith)/i.test(c.source || ''))) {
+    const curatedBadge = document.createElement('div');
+    curatedBadge.className = 'curated-badge';
+    curatedBadge.innerHTML = '<span>🕋</span><div>Answer uses curated authentic sources</div>';
+    content.appendChild(curatedBadge);
+  }
   
   // Citations
   if (citations && citations.length > 0) {
@@ -287,7 +422,7 @@ function addMessage(role, text, citations = null, isFallback = false) {
   if (currentChatId) {
     const chat = chats.find(c => c.id === currentChatId);
     if (chat) {
-      chat.messages.push({ role, text, citations, isFallback });
+      chat.messages.push({ role, text, citations, isFallback, mode });
     }
   }
 }
@@ -326,8 +461,9 @@ function removeLoadingMessage(loadingId) {
 
 function updateChatHistory() {
   chatHistory.innerHTML = '';
-  
-  chats.slice().reverse().forEach(chat => {
+  // Chats array already fetched from backend ordered by most recent updated_at DESC.
+  // Remove previous reverse so newest chats appear first.
+  chats.slice().forEach(chat => {
     const chatItem = document.createElement('div');
     chatItem.className = 'chat-history-item';
     chatItem.style.cssText = 'padding:0.75rem;cursor:pointer;border-radius:0.375rem;font-size:0.875rem;color:var(--text-secondary);transition:all 0.2s;display:flex;justify-content:space-between;align-items:center;';
@@ -403,7 +539,7 @@ async function loadChat(chatId) {
     
     // Display messages
     messages.forEach(msg => {
-      addMessage(msg.role, msg.content, msg.citations, msg.is_fallback);
+      addMessage(msg.role, msg.content, msg.citations, msg.is_fallback, msg.mode || 'rag');
     });
     
     closeMobileMenu();

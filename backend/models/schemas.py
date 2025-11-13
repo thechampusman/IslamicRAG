@@ -7,6 +7,8 @@ class AskRequest(BaseModel):
     temperature: Optional[float] = 0.2
     top_k: Optional[int] = 4
     chat_id: Optional[str] = None  # For chat history
+    use_web: Optional[bool] = False  # If true, attempt web augmentation
+    web_urls: Optional[List[str]] = None  # Explicit URLs to fetch and augment
 
 class Passage(BaseModel):
     id: str
@@ -24,6 +26,7 @@ class AskResponse(BaseModel):
     answer: str
     citations: List[Citation]
     used_passage_ids: List[str]
+    mode: str = "rag"  # rag, rag-web, fallback, direct
 
 class IngestRequest(BaseModel):
     path: str
@@ -50,4 +53,5 @@ class MessageResponse(BaseModel):
     content: str
     citations: Optional[List[Citation]] = None
     is_fallback: bool
+    mode: Optional[str] = None
     created_at: str

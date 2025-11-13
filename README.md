@@ -77,6 +77,45 @@ These improvements were added during the recent development cycle:
 
 See files: `backend/services/generator.py`, `backend/services/rag.py`, `backend/db/chatdb.py`, `ui/app.js`, `ui/index.html`, `ui/styles.css`.
 
+### 🔄 Additional Enhancements (Latest Additions Not Previously Listed)
+
+The following features have been implemented after the earlier README update and are now part of the project:
+
+- Curated Dua Retrieval:
+	- Integrated curated dua dataset (`backend/data/duas.json`) with Quran/Hadith-backed entries.
+	- Curated answers return in `mode: rag` with authentic source citations and a green curated badge in the UI.
+	- Fallback small in-code dua set ensures reliability if JSON file has no match.
+
+- Ephemeral Web Augmentation:
+	- Optional on-demand web fetch (`rag-web` mode) using transient cleaned chunks (not persisted to vector DB).
+	- Differentiated badge “🌐” for web-sourced answers.
+
+- Prayer Times System:
+	- New endpoint: `GET /prayer-times?lat=..&lon=..&method=MWL&asr=standard&tz=Zone` returns today’s timetable (Fajr–Isha) with method label, Asr madhhab, timezone offset.
+	- Frontend prayer times card with geolocation (“Use My Location”), method selector (MWL / ISNA / Egypt / Umm al-Qura / Karachi), Asr (Standard / Hanafi).
+	- Local persistence of method, Asr, and last coordinates via `localStorage` (survives refresh & server restarts).
+	- Added Karachi (University of Islamic Sciences) calculation profile.
+
+- Mode Switching:
+	- Endpoint `GET/POST /model/mode` to toggle between `uncensored` and `censored` runtime modes; reflected in UI select.
+
+- Direct Utility Responses:
+	- Date/time style queries return `mode: direct` with system UTC + local time (no unnecessary web calls).
+
+- Halal/Haram Classifier:
+	- Fast path for explicit ruling questions returns concise verdict (mode `direct`) inviting further explanation.
+
+- Persistence & State Enhancements:
+	- LocalStorage for theme, prayer settings, and chat mode select.
+	- Automatic DB migration adds `mode` column for messages if missing.
+
+- Scripts:
+	- Added `scripts/smoke_dua_test.py` for quick curated dua verification (outputs mode + citation counts).
+
+Refer to updated files: `backend/services/prayer_times.py`, `backend/app.py` (new endpoint), `backend/services/duas.py`, `backend/services/rag.py`, `ui/app.js` (persistence logic), `ui/index.html` (prayer times card), `ui/styles.css` (new badge & card styles).
+
+No breaking changes to existing ingestion or `/ask` contract were introduced; these are additive improvements for reliability and user experience.
+
 ---
 ## 🏛 Architecture (Conceptual)
 1. **Ingestion**: Files in `data/raw` → chunking → embeddings via Ollama → stored in Chroma
