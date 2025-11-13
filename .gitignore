@@ -12,3 +12,6 @@ __pycache__/
 /data/processed/
 /data/chathistory.db
 *.db
+
+# Docs
+/docs/
