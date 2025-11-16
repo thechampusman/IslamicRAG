@@ -7,7 +7,6 @@ Assalamu alaykum wa rahmatullahi wa barakatuh.
 
 
 # Islamic RAG (Local · Private · Cited)
-    (Islamic GPT, Islam GPT,)
 
 
 <p>
