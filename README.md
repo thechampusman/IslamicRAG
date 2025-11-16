@@ -9,7 +9,6 @@ Assalamu alaykum wa rahmatullahi wa barakatuh.
 # Islamic RAG (Local · Private · Cited)
 
 
-
 <p>
 	<img src="https://visitor-badge.laobi.icu/badge?page_id=thechampusman.remove_flutter_dart_comments" alt="Visitor Count" />
 	<img src="https://img.shields.io/badge/Python-3.11%2B-blue?logo=python&logoColor=white" alt="Python 3.11+" />
