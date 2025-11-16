@@ -44,8 +44,14 @@ A local-first Retrieval-Augmented Generation (RAG) assistant focused on Islamic 
 - Multiformat ingestion: `txt`, `md`, `json`, `jsonl`, `pdf`, `docx/doc`, images (OCR)
 - Simple UI (vanilla HTML/JS) + structured JSON API
 - Explicit citations with file source & snippet context
-- Multiple response modes: `direct` (ruling), `rag` (citations), `fallback` (general), `rag-web` (web-augmented)
-- Censored/Uncensored model switching: toggle between safe and educational modes at runtime
+- **Multiple Query Modes:**
+  - `rag` — Answers from your local knowledge base with citations
+  - `rag+internet` — Combines local knowledge with live web sources (transient, not stored)
+  - `rag+llm` — RAG answer enhanced with brief general Islamic guidance
+  - `internet` — Web-only mode using fetched Islamic sources (no local DB)
+  - `llm` — Direct model knowledge without retrieval (fallback mode)
+  - `direct` — Fast rulings for halal/haram or prayer time queries
+- **Censored/Uncensored switching:** Toggle between safe (censored) and educational (uncensored) models at runtime
 
 ---
 ## ✨ What's New (Recent Updates)
