@@ -7,15 +7,42 @@
   <link rel="stylesheet" href="styles.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+  <!-- Subtle Floating Background Icons -->
+  <div class="floating-icons" aria-hidden="true">
+    <i class="fas fa-mosque"></i>
+    <i class="fas fa-book-quran"></i>
+    <i class="fas fa-hands-praying"></i>
+    <i class="fas fa-star-and-crescent"></i>
+    <i class="fas fa-kaaba"></i>
+    <i class="fas fa-globe"></i>
+    <i class="fas fa-calendar-days"></i>
+  </div>
+
+  <!-- Animated Icon Waves Background -->
+  <div class="icon-waves" aria-hidden="true">
+    <div class="icon-wave wave1">
+      <i class="fas fa-mosque"></i><i class="fas fa-book-quran"></i><i class="fas fa-hands-praying"></i><i class="fas fa-star-and-crescent"></i>
+      <i class="fas fa-kaaba"></i><i class="fas fa-cloud-sun"></i><i class="fas fa-moon"></i><i class="fas fa-mosque"></i>
+      <i class="fas fa-book-quran"></i><i class="fas fa-hands-praying"></i><i class="fas fa-star-and-crescent"></i><i class="fas fa-kaaba"></i>
+    </div>
+    <div class="icon-wave wave2">
+      <i class="fas fa-book-quran"></i><i class="fas fa-moon"></i><i class="fas fa-cloud-sun"></i><i class="fas fa-mosque"></i>
+      <i class="fas fa-hands-praying"></i><i class="fas fa-star-and-crescent"></i><i class="fas fa-kaaba"></i><i class="fas fa-book-quran"></i>
+      <i class="fas fa-moon"></i><i class="fas fa-cloud-sun"></i><i class="fas fa-mosque"></i><i class="fas fa-hands-praying"></i>
+    </div>
+    <div class="icon-wave wave3">
+      <i class="fas fa-star-and-crescent"></i><i class="fas fa-kaaba"></i><i class="fas fa-mosque"></i><i class="fas fa-book-quran"></i>
+      <i class="fas fa-hands-praying"></i><i class="fas fa-moon"></i><i class="fas fa-cloud-sun"></i><i class="fas fa-star-and-crescent"></i>
+      <i class="fas fa-kaaba"></i><i class="fas fa-mosque"></i><i class="fas fa-book-quran"></i><i class="fas fa-hands-praying"></i>
+    </div>
+  </div>
   <!-- Mobile Menu Toggle -->
-  <button class="mobile-menu-toggle" id="mobileMenuToggle">☰</button>
-  
-  <!-- Theme Toggle (Top Right) -->
-  <button class="theme-toggle-btn" id="themeToggle">
-    <span class="theme-icon">🌙</span>
+  <button class="mobile-menu-toggle" id="mobileMenuToggle">
+    <i class="fas fa-bars"></i>
   </button>
   
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -23,41 +50,43 @@
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
-      <h2>Islamic RAG</h2>
-      <p class="subtitle">Local · Private · Cited</p>
+      <div class="sidebar-logo">
+        <div class="logo-icon">
+          <i class="fas fa-mosque"></i>
+        </div>
+        <div>
+          <h2>Islamic RAG</h2>
+          <p class="subtitle">Local · Private · Cited</p>
+        </div>
+      </div>
+      <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Collapse sidebar">
+        <i class="fas fa-chevron-left"></i>
+      </button>
     </div>
     
+    <button class="new-chat-btn" id="newChatBtn" title="New chat">
+      <i class="fas fa-plus"></i>
+      <span class="btn-text">New Chat</span>
+    </button>
 
     <div class="chat-history" id="chatHistory">
       <!-- Chat history items will be added here -->
     </div>
 
     <div class="sidebar-footer">
-      <div class="info-badge rag-mode">
-        <span class="badge-icon">📚</span>
-        <span>RAG Mode</span>
-      </div>
-      <div class="info-badge">
-        <span class="badge-icon">🔒</span>
-        <span>Local & Private</span>
-      </div>
-    
-      <button class="new-chat-btn" id="newChatBtn">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-        New Chat
-      </button>
       <div class="mode-switch">
-        <label for="modelMode" class="mode-label">Mode:</label>
+        <label for="modelMode" class="mode-label">
+          <i class="fas fa-robot"></i> Model:
+        </label>
         <select id="modelMode" class="mode-select" aria-label="Model censorship mode">
           <option value="uncensored">Uncensored</option>
           <option value="censored">Censored</option>
         </select>
       </div>
-      <div class="mode-switch" style="margin-top:0.5rem;">
-        <label for="sourceMode" class="mode-label">Source:</label>
+      <div class="mode-switch">
+        <label for="sourceMode" class="mode-label">
+          <i class="fas fa-database"></i> Source:
+        </label>
         <select id="sourceMode" class="mode-select" aria-label="Answer source mode">
           <option value="rag" selected>RAG</option>
           <option value="rag+internet">RAG + Internet</option>
@@ -65,6 +94,17 @@
           <option value="internet">Internet only</option>
           <option value="llm">LLM only</option>
         </select>
+      </div>
+      
+      <div class="branding-block">
+        <div class="info-badge rag-mode">
+          <span class="badge-icon"><i class="fas fa-book-open"></i></span>
+          <span>RAG Mode Active</span>
+        </div>
+        <div class="branding-name">
+          <strong>Islamic RAG</strong><br>
+          Local AI Assistant
+        </div>
       </div>
     </div>
   </aside>
@@ -79,18 +119,22 @@
           <p class="welcome-subtitle">Ask questions about Islam based on your ingested sources</p>
           
           <div class="prayer-times-card">
-            <div class="pt-header">Today's Prayer Times</div>
+            <div class="pt-header">
+              <i class="fas fa-mosque"></i> Today's Prayer Times
+            </div>
             <div class="pt-basis" id="ptBasisLine">
               <span id="ptBasisText">Based on: Muslim World League</span> <span id="ptTzOffset" class="pt-tz"></span>
             </div>
             <div class="pt-controls">
-              <button id="btnUseLocation" class="pt-btn">📍 Use My Location</button>
+              <button id="btnSetLocation" class="pt-btn">
+                <i class="fas fa-location-dot"></i> Set Location
+              </button>
               <select id="ptMethod" class="pt-select" title="Calc method">
                 <option value="MWL" selected>MWL</option>
                 <option value="ISNA">ISNA</option>
                 <option value="EGYPT">Egypt</option>
                 <option value="UMM_AL_QURA">Umm al-Qura</option>
-                <option value="KARACHI">Karachi (University of Islamic Sciences)</option>
+                <option value="KARACHI">Karachi</option>
               </select>
               <select id="ptAsr" class="pt-select" title="Asr method">
                 <option value="standard" selected>Asr: Standard</option>
@@ -98,32 +142,44 @@
               </select>
             </div>
             <div id="ptTimes" class="pt-grid">
-              <div class="pt-row"><span>Fajr</span><span>--:--</span></div>
-              <div class="pt-row"><span>Sunrise</span><span>--:--</span></div>
-              <div class="pt-row"><span>Dhuhr</span><span>--:--</span></div>
-              <div class="pt-row"><span>Asr</span><span>--:--</span></div>
-              <div class="pt-row"><span>Maghrib</span><span>--:--</span></div>
-              <div class="pt-row"><span>Isha</span><span>--:--</span></div>
+              <div class="pt-row">
+                <span><i class="fas fa-sun"></i> Fajr</span><span>--:--</span>
+              </div>
+              <div class="pt-row">
+                <span><i class="fas fa-sun-plant-wilt"></i> Sunrise</span><span>--:--</span>
+              </div>
+              <div class="pt-row">
+                <span><i class="fas fa-sun"></i> Dhuhr</span><span>--:--</span>
+              </div>
+              <div class="pt-row">
+                <span><i class="fas fa-cloud-sun"></i> Asr</span><span>--:--</span>
+              </div>
+              <div class="pt-row">
+                <span><i class="fas fa-cloud-sun"></i> Maghrib</span><span>--:--</span>
+              </div>
+              <div class="pt-row">
+                <span><i class="fas fa-moon"></i> Isha</span><span>--:--</span>
+              </div>
             </div>
             <div class="pt-meta" id="ptMeta"></div>
           </div>
           <div class="example-prompts">
             <div class="example-prompt" data-prompt="What is Tawheed?">
-              <span class="prompt-icon">🕌</span>
+              <span class="prompt-icon"><i class="fas fa-mosque"></i></span>
               <div>
                 <div class="prompt-title">Islamic Theology</div>
                 <div class="prompt-text">What is Tawheed?</div>
               </div>
             </div>
             <div class="example-prompt" data-prompt="Explain the importance of Salah">
-              <span class="prompt-icon">🤲</span>
+              <span class="prompt-icon"><i class="fas fa-hands-praying"></i></span>
               <div>
                 <div class="prompt-title">Worship & Practice</div>
                 <div class="prompt-text">Explain the importance of Salah</div>
               </div>
             </div>
             <div class="example-prompt" data-prompt="What does the Quran say about patience?">
-              <span class="prompt-icon">📖</span>
+              <span class="prompt-icon"><i class="fas fa-book-quran"></i></span>
               <div>
                 <div class="prompt-title">Quranic Guidance</div>
                 <div class="prompt-text">What does the Quran say about patience?</div>
@@ -150,10 +206,7 @@
             autocomplete="off"
           ></textarea>
           <button type="submit" class="send-btn" id="sendBtn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="22" y1="2" x2="11" y2="13"></line>
-              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-            </svg>
+            <i class="fas fa-paper-plane"></i>
           </button>
         </div>
       </form>
@@ -163,9 +216,62 @@
     </div>
   </main>
 
+  <!-- Location Modal -->
+  <div class="modal-overlay" id="locationModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Set Location for Prayer Times</h3>
+        <button class="modal-close" id="closeLocationModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <button class="location-option-btn" id="useCurrentLocation">
+          <span class="location-icon"><i class="fas fa-location-crosshairs"></i></span>
+          <div class="location-option-text">
+            <div class="location-option-title">Use My Current Location</div>
+            <div class="location-option-desc">Automatically detect your location</div>
+          </div>
+        </button>
+        <div class="divider-text">OR</div>
+        <div class="city-input-group">
+          <label for="cityInput" class="city-label">
+            <i class="fas fa-city"></i> Enter City Name
+          </label>
+          <input 
+            type="text" 
+            id="cityInput" 
+            class="city-input" 
+            placeholder="e.g., New York, London, Dubai"
+            autocomplete="off"
+          />
+          <button class="city-submit-btn" id="submitCity">
+            <i class="fas fa-search"></i> Find Location
+          </button>
+        </div>
+        <div class="location-status" id="locationStatus"></div>
+      </div>
+    </div>
+  </div>
+
   <script src="app.js"></script>
   <div class="branding-footer">
-    <span>© Usman Gour • <a href="https://github.com/thechampusman/IslamicRAG" target="_blank" rel="noopener">GitHub</a> • <a href="https://www.linkedin.com/in/thechampusman/" target="_blank" rel="noopener">LinkedIn</a></span>
+    <div class="social-links">
+      <span class="copyright">© Usman Gour</span>
+      <a class="social-link icon-github" href="https://github.com/thechampusman/IslamicRAG" target="_blank" rel="noopener" aria-label="GitHub">
+        <i class="fab fa-github"></i>
+      </a>
+      <a class="social-link icon-linkedin" href="https://www.linkedin.com/in/thechampusman/" target="_blank" rel="noopener" aria-label="LinkedIn">
+        <i class="fab fa-linkedin"></i>
+      </a>
+      <a class="social-link icon-instagram" href="https://instagram.com/thechampusman" target="_blank" rel="noopener" aria-label="Instagram">
+        <i class="fab fa-instagram"></i><span class="handle">@thechampusman</span>
+      </a>
+      <a class="social-link icon-telegram" href="https://t.me/thechampusman" target="_blank" rel="noopener" aria-label="Telegram">
+        <i class="fab fa-telegram"></i><span class="handle">@thechampusman</span>
+      </a>
+      <a class="social-link icon-gmail" href="mailto:usmangourworkid@gmail.com" aria-label="Email">
+        <i class="fas fa-envelope"></i><span class="handle">usmangourworkid@gmail.com</span>
+      </a>
+    </div>
   </div>
 </body>
 </html>

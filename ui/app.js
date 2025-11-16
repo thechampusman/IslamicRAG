@@ -10,10 +10,10 @@ const chatForm = document.getElementById('chatForm');
 const questionInput = document.getElementById('questionInput');
 const sendBtn = document.getElementById('sendBtn');
 const examplePrompts = document.querySelectorAll('.example-prompt');
-const themeToggle = document.getElementById('themeToggle');
 const mobileMenuToggle = document.getElementById('mobileMenuToggle');
 const sidebar = document.getElementById('sidebar');
 const sidebarOverlay = document.getElementById('sidebarOverlay');
+const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
 const modelModeSelect = document.getElementById('modelMode');
 const sourceModeSelect = document.getElementById('sourceMode');
 
@@ -27,13 +27,31 @@ let currentChatHasMessages = false; // Track if current chat has any messages
 document.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
   autoResizeTextarea();
-  loadThemePreference();
   loadChatHistory();
   // Load saved source mode
   if (sourceModeSelect) {
     const savedSource = localStorage.getItem('sourceMode') || 'rag';
     sourceModeSelect.value = savedSource;
   }
+  
+  // Apply initial collapsed state on desktop
+  try {
+    const savedCollapsed = localStorage.getItem('sidebarCollapsed') === '1';
+    if (savedCollapsed && window.innerWidth >= 769) {
+      sidebar.classList.add('collapsed');
+    }
+  } catch {}
+  
+  // Keep state sensible across resizes
+  window.addEventListener('resize', () => {
+    if (window.innerWidth < 769) {
+      sidebar.classList.remove('collapsed');
+    } else {
+      if (localStorage.getItem('sidebarCollapsed') === '1') {
+        sidebar.classList.add('collapsed');
+      }
+    }
+  });
   
   // Cancel request when user leaves page
   window.addEventListener('beforeunload', cancelCurrentRequest);
@@ -43,12 +61,23 @@ function setupEventListeners() {
   // New Chat Button
   newChatBtn.addEventListener('click', startNewChat);
   
-  // Theme Toggle
-  themeToggle.addEventListener('click', toggleTheme);
-  
   // Mobile Menu
   mobileMenuToggle.addEventListener('click', toggleMobileMenu);
   sidebarOverlay.addEventListener('click', closeMobileMenu);
+  
+  // Sidebar collapse (desktop)
+  if (sidebarCollapseBtn) {
+    sidebarCollapseBtn.addEventListener('click', () => {
+      if (window.innerWidth < 769) {
+        // On mobile, use the existing drawer behavior
+        toggleMobileMenu();
+        return;
+      }
+      sidebar.classList.toggle('collapsed');
+      const isCollapsed = sidebar.classList.contains('collapsed');
+      localStorage.setItem('sidebarCollapsed', isCollapsed ? '1' : '0');
+    });
+  }
   
   // Example Prompts
   examplePrompts.forEach(prompt => {
@@ -92,12 +121,19 @@ function setupEventListeners() {
   }
 
   // Prayer times widget
-  const btnUseLocation = document.getElementById('btnUseLocation');
+  const btnSetLocation = document.getElementById('btnSetLocation');
+  const locationModal = document.getElementById('locationModal');
+  const closeLocationModal = document.getElementById('closeLocationModal');
+  const useCurrentLocation = document.getElementById('useCurrentLocation');
+  const cityInput = document.getElementById('cityInput');
+  const submitCity = document.getElementById('submitCity');
+  const locationStatus = document.getElementById('locationStatus');
   const ptMethod = document.getElementById('ptMethod');
   const ptAsr = document.getElementById('ptAsr');
   const ptTimes = document.getElementById('ptTimes');
   const ptMeta = document.getElementById('ptMeta');
-  if (btnUseLocation && ptMethod && ptAsr && ptTimes) {
+  
+  if (btnSetLocation && locationModal && closeLocationModal && useCurrentLocation && cityInput && submitCity && locationStatus && ptMethod && ptAsr && ptTimes) {
     const updateTimes = (resp) => {
       const order = ['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'];
       const rows = ptTimes.querySelectorAll('.pt-row');
@@ -131,19 +167,28 @@ function setupEventListeners() {
     const savedAsr = localStorage.getItem('pt_asr');
     const savedLat = localStorage.getItem('pt_lat');
     const savedLon = localStorage.getItem('pt_lon');
+    const savedLocationName = localStorage.getItem('pt_location_name');
+    
     if (savedMethod && [...ptMethod.options].some(o=>o.value===savedMethod)) {
       ptMethod.value = savedMethod;
     }
     if (savedAsr && [...ptAsr.options].some(o=>o.value===savedAsr)) {
       ptAsr.value = savedAsr;
     }
+    
+    // Update button text with saved location
+    if (savedLocationName) {
+      btnSetLocation.innerHTML = `📍 ${savedLocationName}`;
+      btnSetLocation.title = 'Click to change location';
+    }
+    
     if (savedLat && savedLon) {
       lastCoords = { lat: parseFloat(savedLat), lon: parseFloat(savedLon) };
       // Auto-fetch with saved data
       fetchTimes(lastCoords.lat, lastCoords.lon);
     }
 
-    const fetchTimes = async (lat, lon) => {
+    const fetchTimes = async (lat, lon, locationName = null) => {
       try {
         const tz = Intl?.DateTimeFormat?.().resolvedOptions?.().timeZone || '';
         const url = `${API_BASE}/prayer-times?lat=${lat}&lon=${lon}&method=${encodeURIComponent(ptMethod.value)}&asr=${encodeURIComponent(ptAsr.value)}${tz ? `&tz=${encodeURIComponent(tz)}` : ''}`;
@@ -155,22 +200,122 @@ function setupEventListeners() {
         localStorage.setItem('pt_asr', ptAsr.value);
         localStorage.setItem('pt_lat', String(lat));
         localStorage.setItem('pt_lon', String(lon));
+        
+        // Save and update location name if provided
+        if (locationName) {
+          localStorage.setItem('pt_location_name', locationName);
+          btnSetLocation.innerHTML = `📍 ${locationName}`;
+          btnSetLocation.title = 'Click to change location';
+        }
       } catch (e) {
         console.error('Failed to fetch prayer times', e);
       }
     };
 
-    btnUseLocation.addEventListener('click', () => {
+    // Modal controls
+    btnSetLocation.addEventListener('click', () => {
+      console.log('Set Location clicked'); // Debug log
+      locationModal.classList.add('active');
+      if (cityInput) cityInput.value = '';
+      if (locationStatus) locationStatus.textContent = '';
+    });
+
+    closeLocationModal.addEventListener('click', () => {
+      console.log('Close modal clicked'); // Debug log
+      locationModal.classList.remove('active');
+    });
+
+    locationModal.addEventListener('click', (e) => {
+      if (e.target === locationModal) {
+        console.log('Overlay clicked'); // Debug log
+        locationModal.classList.remove('active');
+      }
+    });
+
+    // Use current location
+    useCurrentLocation.addEventListener('click', () => {
       if (!navigator.geolocation) {
-        alert('Geolocation not supported');
+        locationStatus.textContent = '❌ Geolocation not supported by your browser';
+        locationStatus.style.color = 'var(--error-color)';
         return;
       }
-      navigator.geolocation.getCurrentPosition((pos) => {
+      locationStatus.textContent = '🔄 Getting your location...';
+      locationStatus.style.color = 'var(--text-secondary)';
+      
+      navigator.geolocation.getCurrentPosition(async (pos) => {
         lastCoords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
-        fetchTimes(lastCoords.lat, lastCoords.lon);
+        
+        // Try to get city name from coordinates using reverse geocoding
+        let locationName = 'My Location';
+        try {
+          const reverseGeoUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lastCoords.lat}&lon=${lastCoords.lon}`;
+          const geoResp = await fetch(reverseGeoUrl);
+          const geoData = await geoResp.json();
+          if (geoData && geoData.address) {
+            locationName = geoData.address.city || geoData.address.town || geoData.address.village || geoData.address.county || 'My Location';
+          }
+        } catch (e) {
+          console.log('Reverse geocoding failed, using default name', e);
+        }
+        
+        fetchTimes(lastCoords.lat, lastCoords.lon, locationName);
+        locationStatus.textContent = '✅ Location set successfully!';
+        locationStatus.style.color = 'var(--accent)';
+        setTimeout(() => {
+          locationModal.classList.remove('active');
+        }, 1000);
       }, (err) => {
-        alert('Location denied. Please allow access to fetch local prayer times.');
+        locationStatus.textContent = '❌ Location access denied. Please allow location access.';
+        locationStatus.style.color = 'var(--error-color)';
       });
+    });
+
+    // Submit city name
+    const handleCitySubmit = async () => {
+      const city = cityInput.value.trim();
+      if (!city) {
+        locationStatus.textContent = '❌ Please enter a city name';
+        locationStatus.style.color = 'var(--error-color)';
+        return;
+      }
+
+      locationStatus.textContent = '🔄 Searching for ' + city + '...';
+      locationStatus.style.color = 'var(--text-secondary)';
+
+      try {
+        // Use Nominatim (OpenStreetMap) for geocoding - free and no API key required
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city)}&limit=1`);
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+          const lat = parseFloat(data[0].lat);
+          const lon = parseFloat(data[0].lon);
+          const locationName = data[0].display_name.split(',')[0];
+          lastCoords = { lat, lon };
+          fetchTimes(lat, lon, locationName);
+          locationStatus.textContent = `✅ Location set to ${locationName}`;
+          locationStatus.style.color = 'var(--accent)';
+          setTimeout(() => {
+            locationModal.classList.remove('active');
+          }, 1500);
+        } else {
+          locationStatus.textContent = '❌ City not found. Please try again.';
+          locationStatus.style.color = 'var(--error-color)';
+        }
+      } catch (error) {
+        console.error('Geocoding error:', error);
+        locationStatus.textContent = '❌ Failed to find location. Please check your internet connection.';
+        locationStatus.style.color = 'var(--error-color)';
+      }
+    };
+
+    submitCity.addEventListener('click', handleCitySubmit);
+    
+    cityInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleCitySubmit();
+      }
     });
 
     ptMethod.addEventListener('change', () => {
@@ -185,6 +330,19 @@ function setupEventListeners() {
       else {
         localStorage.setItem('pt_asr', ptAsr.value);
       }
+    });
+  } else {
+    console.warn('Prayer times widget: Some elements not found', {
+      btnSetLocation: !!btnSetLocation,
+      locationModal: !!locationModal,
+      closeLocationModal: !!closeLocationModal,
+      useCurrentLocation: !!useCurrentLocation,
+      cityInput: !!cityInput,
+      submitCity: !!submitCity,
+      locationStatus: !!locationStatus,
+      ptMethod: !!ptMethod,
+      ptAsr: !!ptAsr,
+      ptTimes: !!ptTimes
     });
   }
   
@@ -205,26 +363,6 @@ function setupEventListeners() {
       }
     }
   });
-}
-
-function toggleTheme() {
-  const currentTheme = document.body.getAttribute('data-theme');
-  const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-  
-  document.body.setAttribute('data-theme', newTheme);
-  localStorage.setItem('theme', newTheme);
-  
-  // Update icon
-  const icon = themeToggle.querySelector('.theme-icon');
-  icon.textContent = newTheme === 'light' ? '☀️' : '🌙';
-}
-
-function loadThemePreference() {
-  const savedTheme = localStorage.getItem('theme') || 'dark';
-  document.body.setAttribute('data-theme', savedTheme);
-  
-  const icon = themeToggle.querySelector('.theme-icon');
-  icon.textContent = savedTheme === 'light' ? '☀️' : '🌙';
 }
 
 function toggleMobileMenu() {
@@ -387,7 +525,7 @@ function addMessage(role, text, citations = null, isFallback = false, mode = 'ra
   // Avatar
   const avatar = document.createElement('div');
   avatar.className = 'message-avatar';
-  avatar.textContent = role === 'user' ? '👤' : '🤖';
+  avatar.innerHTML = role === 'user' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-mosque"></i>';
   messageDiv.appendChild(avatar);
   
   // Content
@@ -403,7 +541,7 @@ function addMessage(role, text, citations = null, isFallback = false, mode = 'ra
   if (mode === 'rag-web' || mode === 'web') {
     const webBadge = document.createElement('div');
     webBadge.className = 'web-source-badge';
-    webBadge.innerHTML = '<span>🌐</span><div>Answer sourced from web (ephemeral)</div>';
+    webBadge.innerHTML = '<span><i class="fas fa-globe"></i></span><div>Answer sourced from web (ephemeral)</div>';
     content.appendChild(webBadge);
   }
   
@@ -411,7 +549,7 @@ function addMessage(role, text, citations = null, isFallback = false, mode = 'ra
   if (mode === 'rag' && Array.isArray(citations) && citations.some(c => /^(Quran|Hadith)/i.test(c.source || ''))) {
     const curatedBadge = document.createElement('div');
     curatedBadge.className = 'curated-badge';
-    curatedBadge.innerHTML = '<span>🕋</span><div>Answer uses curated authentic sources</div>';
+    curatedBadge.innerHTML = '<span><i class="fas fa-kaaba"></i></span><div>Answer uses curated authentic sources</div>';
     content.appendChild(curatedBadge);
   }
   
@@ -422,7 +560,7 @@ function addMessage(role, text, citations = null, isFallback = false, mode = 'ra
     
     const header = document.createElement('div');
     header.className = 'citations-header';
-    header.innerHTML = '📚 Sources';
+    header.innerHTML = '<i class="fas fa-book-open"></i> Sources';
     citationsDiv.appendChild(header);
     
     citations.forEach((c, i) => {
@@ -454,7 +592,7 @@ function addMessage(role, text, citations = null, isFallback = false, mode = 'ra
   if (isFallback) {
     const fallbackDiv = document.createElement('div');
     fallbackDiv.className = 'fallback-notice';
-    fallbackDiv.innerHTML = '<span>⚠️</span><div>No documents found in database. Answer based on general Islamic knowledge. Add more texts to improve accuracy!</div>';
+    fallbackDiv.innerHTML = '<span><i class="fas fa-exclamation-triangle"></i></span><div>No documents found in database. Answer based on general Islamic knowledge. Add more texts to improve accuracy!</div>';
     content.appendChild(fallbackDiv);
   }
   
@@ -483,7 +621,7 @@ function addLoadingMessage() {
   
   const avatar = document.createElement('div');
   avatar.className = 'message-avatar';
-  avatar.textContent = '🤖';
+  avatar.innerHTML = '<i class="fas fa-mosque"></i>';
   messageDiv.appendChild(avatar);
   
   const content = document.createElement('div');
@@ -509,43 +647,29 @@ function removeLoadingMessage(loadingId) {
 
 function updateChatHistory() {
   chatHistory.innerHTML = '';
-  // Chats array already fetched from backend ordered by most recent updated_at DESC.
-  // Remove previous reverse so newest chats appear first.
+  // Render chats (newest first already from backend)
   chats.slice().forEach(chat => {
     const chatItem = document.createElement('div');
     chatItem.className = 'chat-history-item';
-    chatItem.style.cssText = 'padding:0.75rem;cursor:pointer;border-radius:0.375rem;font-size:0.875rem;color:var(--text-secondary);transition:all 0.2s;display:flex;justify-content:space-between;align-items:center;';
-    
+    if (chat.id === currentChatId) chatItem.classList.add('active');
+
     const titleSpan = document.createElement('span');
+    titleSpan.className = 'chat-title';
     titleSpan.textContent = chat.title;
-    titleSpan.style.flex = '1';
-    titleSpan.style.overflow = 'hidden';
-    titleSpan.style.textOverflow = 'ellipsis';
-    titleSpan.style.whiteSpace = 'nowrap';
-    
+
     const deleteBtn = document.createElement('button');
-    deleteBtn.textContent = '🗑️';
-    deleteBtn.style.cssText = 'background:none;border:none;cursor:pointer;font-size:1rem;opacity:0.6;padding:0.25rem;';
-    deleteBtn.onclick = (e) => {
+    deleteBtn.className = 'chat-delete-btn';
+    deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+    deleteBtn.title = 'Delete chat';
+    deleteBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       deleteChat(chat.id);
-    };
-    
+    });
+
     chatItem.appendChild(titleSpan);
     chatItem.appendChild(deleteBtn);
-    
-    chatItem.addEventListener('mouseenter', () => {
-      chatItem.style.background = 'var(--bg-tertiary)';
-      titleSpan.style.color = 'var(--text-primary)';
-    });
-    
-    chatItem.addEventListener('mouseleave', () => {
-      chatItem.style.background = 'transparent';
-      titleSpan.style.color = 'var(--text-secondary)';
-    });
-    
-    titleSpan.addEventListener('click', () => loadChat(chat.id));
-    
+
+    chatItem.addEventListener('click', () => loadChat(chat.id));
     chatHistory.appendChild(chatItem);
   });
 }
