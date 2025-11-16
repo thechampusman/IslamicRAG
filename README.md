@@ -38,12 +38,14 @@ A local-first Retrieval-Augmented Generation (RAG) assistant focused on Islamic 
 
 ---
 ## 🔍 Highlights
-- Islamic-first answers grounded in Qur’an, Hadith, and scholarly texts you ingest
+- Islamic-first answers grounded in Qur'an, Hadith, and scholarly texts you ingest
 - Local & private (no cloud calls) using Ollama + FastAPI
 - RAG + fallback hybrid: prefers your sources; uses labeled fallback otherwise
 - Multiformat ingestion: `txt`, `md`, `json`, `jsonl`, `pdf`, `docx/doc`, images (OCR)
 - Simple UI (vanilla HTML/JS) + structured JSON API
 - Explicit citations with file source & snippet context
+- Multiple response modes: `direct` (ruling), `rag` (citations), `fallback` (general), `rag-web` (web-augmented)
+- Censored/Uncensored model switching: toggle between safe and educational modes at runtime
 
 ---
 ## ✨ What's New (Recent Updates)
@@ -76,10 +78,6 @@ These improvements were added during the recent development cycle:
 	- Safer HTML rendering with escaping
 
 See files: `backend/services/generator.py`, `backend/services/rag.py`, `backend/db/chatdb.py`, `ui/app.js`, `ui/index.html`, `ui/styles.css`.
-
-### 🔄 Additional Enhancements (Latest Additions Not Previously Listed)
-
-The following features have been implemented after the earlier README update and are now part of the project:
 
 - Curated Dua Retrieval:
 	- Integrated curated dua dataset (`backend/data/duas.json`) with Quran/Hadith-backed entries.
