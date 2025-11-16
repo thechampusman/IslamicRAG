@@ -12,10 +12,36 @@ from backend.core.config import settings
 import httpx
 import numpy as np
 from backend.services.web_fetch import fetch_and_prepare_web_chunks
+import urllib.parse
 from backend.services.duas import search_duas, as_passages
 import re
 
-async def ask(question: str, top_k: int, max_tokens: int, temperature: float, use_web: bool = False, web_urls: Optional[List[str]] = None) -> Dict:
+async def ask(
+    question: str,
+    top_k: int,
+    max_tokens: int,
+    temperature: float,
+    use_web: bool = False,
+    web_urls: Optional[List[str]] = None,
+    conversation_history: Optional[List[Dict]] = None,
+    source_mode: Optional[str] = "rag",
+) -> Dict:
+    # Follow-up handling: if the user asks to translate/elaborate/etc.,
+    # respond based on the last assistant message.
+    if conversation_history and is_follow_up_request(question):
+        prev_answer = None
+        for m in reversed(conversation_history):
+            if m.get('role') == 'assistant' and m.get('content'):
+                prev_answer = m['content']
+                break
+        if prev_answer:
+            return await handle_follow_up(
+                question,
+                prev_answer,
+                max_tokens=min(max_tokens, 512),
+                temperature=min(temperature, 0.5)
+            )
+
     # Centralized routing: decide once, then dispatch
     intent = classify_intent(question)
     if intent == "halal_haram":
@@ -41,10 +67,87 @@ async def ask(question: str, top_k: int, max_tokens: int, temperature: float, us
             'mode': 'direct'
         }
 
+    # Handle explicit source modes that bypass retrieval
+    sm = (source_mode or "rag").lower()
+    if sm == "llm":
+        ans = await generate_fallback_answer(question, max_tokens, temperature)
+        return {
+            'answer': ans,
+            'citations': [],
+            'used_passage_ids': [],
+            'mode': 'llm'
+        }
+
+    if sm == "internet":
+        # Auto-expand sources if user didn't provide explicit URLs
+        effective_urls = list(web_urls or [])
+        if not effective_urls:
+            effective_urls = get_auto_general_urls(question)
+        try:
+            if effective_urls:
+                q_vec = (await fetch_query_embedding(question))
+                web_chunks = await fetch_and_prepare_web_chunks(effective_urls, question)
+                scored = []
+                for wc in web_chunks:
+                    vec = wc.get('embedding')
+                    if not vec:
+                        continue
+                    sim = cosine_similarity(q_vec, vec)
+                    if sim > 0.20:  # Slightly lower threshold for internet-only mode
+                        scored.append({
+                            'id': wc['id'],
+                            'text': wc['text'],
+                            'source': wc['meta'].get('source',''),
+                            'score': float(sim),
+                            'meta': wc['meta'],
+                        })
+                if scored:
+                    answer = await generate_answer(question, scored, max_tokens, temperature)
+                    citations = [{
+                        'source': p.get('source',''),
+                        'reference': p['meta'].get('chunk_index'),
+                        'snippet': p['text'][:180] + ('...' if len(p['text']) > 180 else '')
+                    } for p in scored]
+                    return {
+                        'answer': answer,
+                        'citations': citations,
+                        'used_passage_ids': [p['id'] for p in scored],
+                        'mode': 'web'
+                    }
+        except Exception:
+            pass
+        # If web failed or no chunks matched, supply curated answer for recognized topics
+        if is_tahajjud_query(question):
+            tahajjud_answer = (
+                "Tahajjud (Qiyam al-Layl) is the voluntary night prayer performed after sleeping, in the last third of the night before Fajr. "
+                "Its basis is in Qur'an 17:79 where Allah praises those who stand at night, and many authentic ahadith encourage it (e.g. Bukhari & Muslim narrations on the virtue of night prayer). "
+                "Method: Sleep part of the night, wake with intention, make wudu, pray 2–2 raka'at pairs and conclude with Witr. Start with a small, consistent number. "
+                "Virtues: closeness to Allah, answered supplications, spiritual purification, and following the practice of the Prophet (peace be upon him)."
+            )
+            return {
+                'answer': tahajjud_answer,
+                'citations': [
+                    {'source': 'Quran 17:79', 'reference': '17:79', 'snippet': 'And in some parts of the night, offer the prayer...', 'url': 'https://quran.com/17/79'},
+                    {'source': 'Hadith (Bukhari)', 'reference': None, 'snippet': 'The best prayer after the obligatory prayers is night prayer.', 'url': 'https://sunnah.com/search?q=tahajjud'},
+                    {'source': 'Hadith (Muslim)', 'reference': None, 'snippet': 'Encouragement of Qiyam and its rewards.', 'url': 'https://sunnah.com/search?q=qiyam'}
+                ],
+                'used_passage_ids': [],
+                'mode': 'direct'
+            }
+        # Generic fallback (avoid refusal wording; encourage ingestion)
+        ans = await generate_fallback_answer(question, max_tokens, temperature)
+        return {
+            'answer': ans + "\n\n(Web mode fallback: no internet chunks matched; answer from general Islamic knowledge.)",
+            'citations': [],
+            'used_passage_ids': [],
+            'mode': 'llm'
+        }
+
+    # Default: do retrieval (RAG) possibly with web augmentation if requested or rag+internet
     passages = await retrieve(question, top_k)
 
     # Optionally augment with web chunks (ephemeral, not stored in vector DB)
-    if use_web or (web_urls and len(web_urls) > 0):
+    if use_web or sm == "rag+internet" or (web_urls and len(web_urls) > 0):
         try:
             q_vec = (await fetch_query_embedding(question))
             web_chunks = await fetch_and_prepare_web_chunks(web_urls or [], question)
@@ -71,18 +174,42 @@ async def ask(question: str, top_k: int, max_tokens: int, temperature: float, us
     if relevant_passages:
         # RAG mode: Use retrieved passages
         answer = await generate_answer(question, relevant_passages, max_tokens, temperature)
+        # If rag+llm, append a brief model-only complement (2 lines max)
+        if sm == "rag+llm":
+            try:
+                extra = await generate_fallback_answer(
+                    f"In 2 sentences max, add general Islamic guidance for: {question}",
+                    max_tokens=min(128, max_tokens//2),
+                    temperature=min(0.3, temperature)
+                )
+                if extra:
+                    answer = answer.strip() + "\n\nAdditional guidance: " + extra.strip()
+            except Exception:
+                pass
         citations = []
         for p in relevant_passages:
+            src = p.get('source','')
+            # Try explicit URL first (web-augmented)
+            url = None
+            if isinstance(src, str) and src.startswith('http'):
+                url = src
+            elif p.get('meta') and isinstance(p['meta'].get('source'), str) and p['meta'].get('source','').startswith('http'):
+                url = p['meta']['source']
+            snippet = p['text'][:180] + ('...' if len(p['text']) > 180 else '')
+            # If still no URL, try mapping based on source/reference
+            if not url:
+                url = map_citation_url(src, str(p['meta'].get('reference') or ''), snippet)
             citations.append({
-                'source': p.get('source',''),
+                'source': src,
                 'reference': p['meta'].get('chunk_index'),
-                'snippet': p['text'][:180] + ('...' if len(p['text']) > 180 else '')
+                'snippet': snippet,
+                **({'url': url} if url else {})
             })
         return {
             'answer': answer,
             'citations': citations,
             'used_passage_ids': [p['id'] for p in relevant_passages],
-            'mode': 'rag'
+            'mode': 'rag+llm' if sm == 'rag+llm' else ('rag-web' if (use_web or sm == 'rag+internet' or (web_urls and len(web_urls) > 0)) else 'rag')
         }
     else:
         # Curated dua mapping first (more reliable than fragile web scraping)
@@ -98,10 +225,15 @@ async def ask(question: str, top_k: int, max_tokens: int, temperature: float, us
                 answer = await generate_answer(question, curated, max_tokens, temperature)
                 citations = []
                 for p in curated:
+                    src = p.get('source','')
+                    ref = p.get('reference')
+                    snippet = p['text'][:180] + ('...' if len(p['text']) > 180 else '')
+                    url = map_citation_url(src, ref, snippet)
                     citations.append({
-                        'source': p.get('source',''),
-                        'reference': p.get('reference'),
-                        'snippet': p['text'][:180] + ('...' if len(p['text']) > 180 else '')
+                        'source': src,
+                        'reference': ref,
+                        'snippet': snippet,
+                        **({'url': url} if url else {})
                     })
                 return {
                     'answer': answer + "\n\n(Answered using curated authentic dua sources.)",
@@ -133,10 +265,13 @@ async def ask(question: str, top_k: int, max_tokens: int, temperature: float, us
                         answer = await generate_answer(question, scored, max_tokens, temperature)
                         citations = []
                         for p in scored:
+                            src = p.get('source','')
+                            url = src if isinstance(src, str) and src.startswith('http') else None
                             citations.append({
-                                'source': p.get('source',''),
+                                'source': src,
                                 'reference': p['meta'].get('chunk_index'),
-                                'snippet': p['text'][:180] + ('...' if len(p['text']) > 180 else '')
+                                'snippet': p['text'][:180] + ('...' if len(p['text']) > 180 else ''),
+                                **({'url': url} if url else {})
                             })
                         return {
                             'answer': answer + "\n\n(Used ephemeral web sources for dua retrieval.)",
@@ -172,10 +307,13 @@ async def ask(question: str, top_k: int, max_tokens: int, temperature: float, us
                         answer = await generate_answer(question, scored, max_tokens, temperature)
                         citations = []
                         for p in scored:
+                            src = p.get('source','')
+                            url = src if isinstance(src, str) and src.startswith('http') else None
                             citations.append({
-                                'source': p.get('source',''),
+                                'source': src,
                                 'reference': p['meta'].get('chunk_index'),
-                                'snippet': p['text'][:180] + ('...' if len(p['text']) > 180 else '')
+                                'snippet': p['text'][:180] + ('...' if len(p['text']) > 180 else ''),
+                                **({'url': url} if url else {})
                             })
                         return {
                             'answer': answer + "\n\n(Used web sources for hijri date info.)",
@@ -211,10 +349,13 @@ async def ask(question: str, top_k: int, max_tokens: int, temperature: float, us
                         answer = await generate_answer(question, scored, max_tokens, temperature)
                         citations = []
                         for p in scored:
+                            src = p.get('source','')
+                            url = src if isinstance(src, str) and src.startswith('http') else None
                             citations.append({
-                                'source': p.get('source',''),
+                                'source': src,
                                 'reference': p['meta'].get('chunk_index'),
-                                'snippet': p['text'][:180] + ('...' if len(p['text']) > 180 else '')
+                                'snippet': p['text'][:180] + ('...' if len(p['text']) > 180 else ''),
+                                **({'url': url} if url else {})
                             })
                         return {
                             'answer': answer + "\n\n(Used web sources for halal food info.)",
@@ -296,6 +437,24 @@ def cosine_similarity(a: List[float], b: List[float]) -> float:
     vb = np.array(b)
     denom = (np.linalg.norm(va) * np.linalg.norm(vb)) or 1e-9
     return float(np.dot(va, vb) / denom)
+
+def _shorten(text: str, words: int = 6) -> str:
+    parts = (text or '').split()
+    return ' '.join(parts[:words])
+
+def map_citation_url(source: str, reference: Optional[str], snippet: Optional[str] = None) -> Optional[str]:
+    if not source:
+        return None
+    s = source.lower()
+    # Quran mapping e.g. "Quran 2:201" or source starting with quran
+    if s.startswith('quran') and reference:
+        return f"https://quran.com/{reference.replace(':','/')}"
+    # Common hadith collections mapped to Sunnah search
+    hadith_books = ['bukhari', 'muslim', 'tirmidhi', 'abu dawud', "abu dāwūd", 'nasai', "an-nasa'i", 'ibn majah', 'ahmad', 'ibn hibban']
+    if any(book in s for book in hadith_books):
+        query = reference or _shorten(snippet or source, 8) or source
+        return f"https://sunnah.com/search?q={urllib.parse.quote(query)}"
+    return None
 
 DUA_KEYWORDS = [r"\bdua\b", r"\bduaa\b", r"supplication", r"pray for", r"invocation", r"prayer for"]
 
@@ -428,3 +587,117 @@ def get_current_datetime_urls() -> List[str]:
         "https://www.timeanddate.com/worldclock/",
         "https://time.is/",
     ]
+
+def is_follow_up_request(q: str) -> bool:
+    """Detect if question is a follow-up (translate, explain more, etc.)"""
+    q_low = q.lower().strip()
+    follow_up_patterns = [
+        r"^(tell|explain|translate|say|write).*(in|to)\s+(hindi|urdu|arabic|english)",
+        r"^(in|to)\s+(hindi|urdu|arabic|english)",
+        r"^(explain|elaborate|clarify|simplify|summarize)",
+        r"^(more|why|how)",
+        r"^tell me (more|again|in)",
+    ]
+    return any(re.search(pat, q_low) for pat in follow_up_patterns)
+
+async def handle_follow_up(question: str, previous_answer: str, max_tokens: int, temperature: float) -> Dict:
+    """Handle follow-up requests like translation or elaboration."""
+    from backend.core.config import settings
+    
+    prompt = (
+        f"Previous answer:\n{previous_answer}\n\n"
+        f"User follow-up request: {question}\n\n"
+        "Fulfill the user's request based on the previous answer. "
+        "If asking for translation, translate accurately. "
+        "If asking for more detail, expand on the previous answer. "
+        "Maintain Islamic authenticity:"
+    )
+    
+    async with httpx.AsyncClient(timeout=120) as client:
+        resp = await client.post(
+            f"{settings.ollama_base_url}/api/generate",
+            json={
+                "model": settings.chat_model,
+                "prompt": prompt,
+                "stream": False,
+                "options": {
+                    "temperature": temperature,
+                    "num_predict": max_tokens,
+                }
+            }
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        answer = data.get('response', '')
+    
+    return {
+        'answer': answer,
+        'citations': [],
+        'used_passage_ids': [],
+        'mode': 'follow-up'
+    }
+
+# --- General topic helpers for internet-only mode ---
+GENERAL_KEYWORD_URLS = {
+    'tahajjud': [
+        'https://quran.com/17/79',
+        'https://sunnah.com/search?q=tahajjud',
+        'https://islamqa.info/en/search?word=tahajjud',
+        'https://www.islamicfinder.org/news/tahajjud-prayer/'
+    ],
+    'qiyam': [
+        'https://sunnah.com/search?q=qiyam',
+        'https://quran.com/73',  # Surah Al-Muzzammil night prayer
+    ],
+    'zakat': [
+        'https://quran.com/2/43',
+        'https://quran.com/9/60',
+        'https://sunnah.com/search?q=zakat'
+    ],
+    'hajj': [
+        'https://quran.com/22',
+        'https://sunnah.com/search?q=hajj'
+    ],
+    'fasting': [
+        'https://quran.com/2/183',
+        'https://sunnah.com/search?q=fasting'
+    ]
+}
+
+def get_auto_general_urls(question: str) -> List[str]:
+    q = question.lower()
+    urls: List[str] = []
+    # Misspelling normalization for tahajjud
+    if is_tahajjud_query(q):
+        urls.extend(GENERAL_KEYWORD_URLS['tahajjud'])
+    # English phrase support
+    if re.search(r"\bnight\s+prayer\b", q) or re.search(r"\bprayer\s+at\s+night\b", q):
+        urls.extend(GENERAL_KEYWORD_URLS['tahajjud'])
+    for key, key_urls in GENERAL_KEYWORD_URLS.items():
+        if key in q:
+            urls.extend(key_urls)
+    return list(dict.fromkeys(urls))
+
+def _normalize_translit(s: str) -> str:
+    s = s.lower()
+    s = re.sub(r"['’`-]", "", s)
+    s = s.replace("th", "t")
+    s = re.sub(r"(\s+)", "", s)
+    # collapse repeated letters (e.g., aa -> a, jj -> j)
+    s = re.sub(r"(.)\1+", r"\1", s)
+    return s
+
+def is_tahajjud_query(q: str) -> bool:
+    q_low = q.lower()
+    norm = _normalize_translit(q_low)
+    variants = [
+        "tahajjud", "tahajud", "tahajood", "tahajut",
+        "tajjud", "tajud",  # common misspellings after th->t
+        "qiyamalayl", "qiyamallayl", "qiyamulayl",
+    ]
+    if any(v in norm for v in variants):
+        return True
+    # English phrase detection
+    if re.search(r"\bnight\s+prayer\b", q_low) or re.search(r"\bprayer\s+at\s+night\b", q_low):
+        return True
+    return False

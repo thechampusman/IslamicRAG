@@ -161,11 +161,12 @@ No breaking changes to existing ingestion or `/ask` contract were introduced; th
 ---
 ## 🚀 Quick Start (PowerShell)
 
-1) Pull models (choose ones you want):
+1) Pull models (censored/uncensored + embeddings):
 
 ```powershell
-ollama pull wizard-vicuna-uncensored:13b
-ollama pull nomic-embed-text
+ollama pull llama3.1:8b           # CENSORED (safer)
+ollama pull dolphin-llama3:8b     # UNCENSORED (educational)
+ollama pull nomic-embed-text      # Embeddings
 ```
 
 2) Create & activate virtual environment:

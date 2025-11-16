@@ -27,13 +27,6 @@
       <p class="subtitle">Local · Private · Cited</p>
     </div>
     
-    <button class="new-chat-btn" id="newChatBtn">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="12" y1="5" x2="12" y2="19"></line>
-        <line x1="5" y1="12" x2="19" y2="12"></line>
-      </svg>
-      New Chat
-    </button>
 
     <div class="chat-history" id="chatHistory">
       <!-- Chat history items will be added here -->
@@ -61,6 +54,16 @@
         <select id="modelMode" class="mode-select" aria-label="Model censorship mode">
           <option value="uncensored">Uncensored</option>
           <option value="censored">Censored</option>
+        </select>
+      </div>
+      <div class="mode-switch" style="margin-top:0.5rem;">
+        <label for="sourceMode" class="mode-label">Source:</label>
+        <select id="sourceMode" class="mode-select" aria-label="Answer source mode">
+          <option value="rag" selected>RAG</option>
+          <option value="rag+internet">RAG + Internet</option>
+          <option value="rag+llm">RAG + LLM</option>
+          <option value="internet">Internet only</option>
+          <option value="llm">LLM only</option>
         </select>
       </div>
     </div>

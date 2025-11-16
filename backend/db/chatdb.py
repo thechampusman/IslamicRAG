@@ -142,13 +142,14 @@ class ChatDB:
             return messages
     
     def get_all_chats(self, limit: int = 50) -> List[Dict]:
-        """Get all chats ordered by most recent."""
+        """Get all chats with at least one message, ordered by most recent."""
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.execute(
-                """SELECT id, title, created_at, updated_at 
-                   FROM chats 
-                   ORDER BY updated_at DESC 
+                """SELECT c.id, c.title, c.created_at, c.updated_at
+                   FROM chats c
+                   WHERE EXISTS (SELECT 1 FROM messages m WHERE m.chat_id = c.id)
+                   ORDER BY c.updated_at DESC 
                    LIMIT ?""",
                 (limit,)
             )

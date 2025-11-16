@@ -33,6 +33,11 @@ async def health():
 
 @app.post("/ask")
 async def ask(req: AskRequest):
+    # Convert conversation_history to dict if provided
+    history = None
+    if req.conversation_history:
+        history = [{'role': m.role, 'content': m.content} for m in req.conversation_history]
+    
     res = await rag_ask(
         question=req.question,
         top_k=req.top_k or settings.top_k,
@@ -40,6 +45,8 @@ async def ask(req: AskRequest):
         temperature=req.temperature or settings.temperature,
         use_web=req.use_web or False,
         web_urls=req.web_urls or [],
+        conversation_history=history,
+        source_mode=(req.source_mode or "rag").lower(),
     )
     
     # Save to chat history if chat_id provided

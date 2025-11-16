@@ -15,11 +15,13 @@ const mobileMenuToggle = document.getElementById('mobileMenuToggle');
 const sidebar = document.getElementById('sidebar');
 const sidebarOverlay = document.getElementById('sidebarOverlay');
 const modelModeSelect = document.getElementById('modelMode');
+const sourceModeSelect = document.getElementById('sourceMode');
 
 // State
 let currentChatId = null;
 let chats = [];
 let currentRequestController = null; // For cancelling ongoing requests
+let currentChatHasMessages = false; // Track if current chat has any messages
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -27,6 +29,11 @@ document.addEventListener('DOMContentLoaded', () => {
   autoResizeTextarea();
   loadThemePreference();
   loadChatHistory();
+  // Load saved source mode
+  if (sourceModeSelect) {
+    const savedSource = localStorage.getItem('sourceMode') || 'rag';
+    sourceModeSelect.value = savedSource;
+  }
   
   // Cancel request when user leaves page
   window.addEventListener('beforeunload', cancelCurrentRequest);
@@ -75,6 +82,13 @@ function setupEventListeners() {
     fetch(`${API_BASE}/model/mode`).then(r => r.json()).then(data => {
       if (data.mode) modelModeSelect.value = data.mode;
     }).catch(()=>{});
+  }
+
+  // Source mode persist
+  if (sourceModeSelect) {
+    sourceModeSelect.addEventListener('change', (e) => {
+      localStorage.setItem('sourceMode', e.target.value);
+    });
   }
 
   // Prayer times widget
@@ -224,21 +238,26 @@ function closeMobileMenu() {
 }
 
 function startNewChat() {
+  // Reuse current empty chat if it exists (no new server chat)
+  if (currentChatId && !currentChatHasMessages) {
+    welcomeScreen.style.display = 'flex';
+    messagesContainer.classList.remove('active');
+    messagesContainer.innerHTML = '';
+    closeMobileMenu();
+    questionInput.focus();
+    return;
+  }
+
   currentChatId = Date.now().toString();
-  
-  // Create chat on server
-  fetch(`${API_BASE}/chats`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id: currentChatId, title: 'New Chat' })
-  }).catch(err => console.error('Error creating chat:', err));
-  
-  // Add to local array
+  // Do NOT create chat on server yet; defer until first message
+  // Add to local array only (ephemeral until first send)
   chats.push({ id: currentChatId, messages: [], title: 'New Chat' });
+  currentChatHasMessages = false;
+  updateChatHistory();
   
-  // Hide welcome, show messages
-  welcomeScreen.style.display = 'none';
-  messagesContainer.classList.add('active');
+  // Show welcome screen until first message is sent
+  welcomeScreen.style.display = 'flex';
+  messagesContainer.classList.remove('active');
   messagesContainer.innerHTML = '';
   
   closeMobileMenu();
@@ -264,6 +283,21 @@ async function handleSubmit(e) {
     startNewChat();
   }
   
+  // Switch from welcome to messages view on first send
+  welcomeScreen.style.display = 'none';
+  messagesContainer.classList.add('active');
+  
+  // Gather last 2 messages for context (1 user + 1 assistant pair)
+  const chat = chats.find(c => c.id === currentChatId);
+  let conversationHistory = [];
+  if (chat && chat.messages && chat.messages.length > 0) {
+    const lastMessages = chat.messages.slice(-2);
+    conversationHistory = lastMessages.map(m => ({
+      role: m.role,
+      content: m.text
+    }));
+  }
+  
   // Add user message
   addMessage('user', question);
   
@@ -282,7 +316,14 @@ async function handleSubmit(e) {
     const res = await fetch(`${API_BASE}/ask`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question, chat_id: currentChatId }),
+      body: JSON.stringify({ 
+        question, 
+        chat_id: currentChatId,
+        source_mode: sourceModeSelect ? sourceModeSelect.value : 'rag',
+        // Backward compatibility: toggle use_web for rag+internet or internet only
+        use_web: (sourceModeSelect && (sourceModeSelect.value === 'rag+internet' || sourceModeSelect.value === 'internet')) ? true : undefined,
+        conversation_history: conversationHistory.length > 0 ? conversationHistory : undefined
+      }),
       signal: currentRequestController.signal
     });
     
@@ -359,7 +400,7 @@ function addMessage(role, text, citations = null, isFallback = false, mode = 'ra
   content.appendChild(textDiv);
   
   // Web source indicator
-  if (mode === 'rag-web') {
+  if (mode === 'rag-web' || mode === 'web') {
     const webBadge = document.createElement('div');
     webBadge.className = 'web-source-badge';
     webBadge.innerHTML = '<span>🌐</span><div>Answer sourced from web (ephemeral)</div>';
@@ -390,7 +431,12 @@ function addMessage(role, text, citations = null, isFallback = false, mode = 'ra
       
       const source = document.createElement('div');
       source.className = 'citation-source';
-      source.textContent = `${i + 1}. ${c.source}`;
+      const url = c.url || (typeof c.source === 'string' && /^https?:\/\//i.test(c.source) ? c.source : null);
+      if (url) {
+        source.innerHTML = `${i + 1}. <a href="${url}" target="_blank" rel="noopener">${(c.source || url)}</a>`;
+      } else {
+        source.textContent = `${i + 1}. ${c.source}`;
+      }
       citationItem.appendChild(source);
       
       const snippet = document.createElement('div');
@@ -425,6 +471,8 @@ function addMessage(role, text, citations = null, isFallback = false, mode = 'ra
       chat.messages.push({ role, text, citations, isFallback, mode });
     }
   }
+  // Mark chat as non-empty after any message
+  currentChatHasMessages = true;
 }
 
 function addLoadingMessage() {
@@ -533,9 +581,17 @@ async function loadChat(chatId) {
     const messages = await res.json();
     
     currentChatId = chatId;
-    welcomeScreen.style.display = 'none';
-    messagesContainer.classList.add('active');
     messagesContainer.innerHTML = '';
+    if (!messages || messages.length === 0) {
+      // Show welcome when chat has no messages yet
+      welcomeScreen.style.display = 'flex';
+      messagesContainer.classList.remove('active');
+      currentChatHasMessages = false;
+    } else {
+      welcomeScreen.style.display = 'none';
+      messagesContainer.classList.add('active');
+      currentChatHasMessages = true;
+    }
     
     // Display messages
     messages.forEach(msg => {
