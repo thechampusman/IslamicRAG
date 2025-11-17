@@ -313,34 +313,52 @@ body::after {
   margin-bottom: var(--spacing-xl);
   padding-bottom: var(--spacing-lg);
   border-bottom: 2px solid var(--border-color);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
 }
 
-/* Sidebar collapse toggle button */
-.sidebar-collapse-btn {
-  width: 36px;
-  height: 36px;
+/* Sidebar collapse badge attached to the sidebar edge */
+.sidebar-collapse-badge {
+  position: absolute;
+  top: 50%;
+  right: -10px;
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 20px;
+  height: 48px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  border-radius: 0 999px 999px 0;
   border: 1px solid var(--glass-border);
+  border-left: none;
   background: var(--glass-bg);
   color: var(--text-secondary);
-  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all var(--transition-base);
+  box-shadow: 4px 0 18px rgba(0,0,0,0.14);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+  transition: color var(--transition-base), box-shadow var(--transition-base);
 }
 
-.sidebar-collapse-btn:hover {
+.sidebar-collapse-badge::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 15%;
+  width: 2px;
+  height: 70%;
+  background: var(--accent-light);
+  border-radius: 2px;
+  opacity: 0.75;
+}
+
+.sidebar-collapse-badge:hover {
   color: var(--accent);
-  border-color: var(--accent);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.10), 0 0 0 3px var(--accent-light) inset;
+  box-shadow: 6px 0 22px rgba(0,0,0,0.16);
 }
 
-.sidebar-collapse-btn i {
+.sidebar-collapse-badge i {
   transition: transform var(--transition-base);
+  font-size: 0.8rem;
 }
 
 .sidebar-logo {
@@ -417,7 +435,7 @@ body::after {
   }
 
   /* Rotate chevron when collapsed */
-  .sidebar.collapsed .sidebar-collapse-btn i {
+  .sidebar.collapsed .sidebar-collapse-badge i {
     transform: rotate(180deg);
   }
 }
@@ -1863,6 +1881,11 @@ body::after {
   
   .sidebar.open {
     left: 0;
+  }
+
+  /* Hide desktop collapse badge on mobile */
+  .sidebar-collapse-badge {
+    display: none;
   }
 
   .chat-container {

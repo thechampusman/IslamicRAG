@@ -36,6 +36,12 @@ Assalamu alaykum wa rahmatullahi wa barakatuh.
 
 A local-first Retrieval-Augmented Generation (RAG) assistant focused on Islamic knowledge. It integrates with Ollama for chat + embeddings and serves a lightweight web UI for asking questions with source citations. When the knowledge base lacks relevant texts, the system falls back to model knowledge with a warning.
 
+## 🖼 UI Preview
+
+<p align="center">
+	<img src="ScreenShot/1.png" alt="Islamic RAG Web UI Screenshot" />
+</p>
+
 ---
 ## 🔍 Highlights
 - Islamic-first answers grounded in Qur'an, Hadith, and scholarly texts you ingest
